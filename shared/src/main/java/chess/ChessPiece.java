@@ -1,5 +1,8 @@
 package chess;
 
+import chess.moveCalculators.*;
+
+import javax.management.BadAttributeValueExpException;
 import java.util.Collection;
 
 /**
@@ -9,8 +12,12 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessPiece {
+    PieceType type;
+    ChessGame.TeamColor color;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.type = type;
+        this.color = pieceColor;
     }
 
     /**
@@ -29,14 +36,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return color;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
     }
 
     /**
@@ -47,6 +54,64 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+
+        switch (type) {
+            case PAWN:
+                 break;
+             case KING:
+                 break;
+             case QUEEN:
+                 break;
+             case BISHOP:
+                 break;
+             case KNIGHT:
+                 break;
+             case ROOK:
+                 break;
+             default:
+                 throw new BadAttributeValueException();
+        }
+    }
+
+    @Override
+    public String toString() {
+        switch (type) {
+            case KING:
+                if (color == ChessGame.TeamColor.BLACK) {
+                    return "k";
+                } else {
+                    return "K";
+                }
+            case QUEEN:
+                if (color == ChessGame.TeamColor.BLACK) {
+                    return "q";
+                } else {
+                    return "Q";
+                }
+            case BISHOP:
+                if (color == ChessGame.TeamColor.BLACK) {
+                    return "b";
+                } else {
+                    return "B";
+                }
+            case KNIGHT:
+                if (color == ChessGame.TeamColor.BLACK) {
+                    return "n";
+                } else {
+                    return "N";
+                }
+            case ROOK:
+                if (color == ChessGame.TeamColor.BLACK) {
+                    return "r";
+                } else {
+                    return "R";
+                }
+            case PAWN:
+                if (color == ChessGame.TeamColor.BLACK) {
+                    return "p";
+                } else {
+                    return "P";
+                }
+        }
     }
 }
