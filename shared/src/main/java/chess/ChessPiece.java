@@ -4,6 +4,7 @@ import chess.moveCalculators.*;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -19,17 +20,17 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.type = type;
         this.color = pieceColor;
-        if (type == PieceType.PAWN) { // default pawns to their first move
-            firstMove = true;
-        } else {
-            firstMove = false;
-        }
+        firstMove = false;
     }
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, boolean firstMove) {
         this.type = type;
         this.color = pieceColor;
-        this.firstMove = firstMove;
+        if (type != PieceType.PAWN && firstMove) {
+            this.firstMove = false; // doesn't matter if not a pawn
+        } else {
+            this.firstMove = firstMove;
+        }
     }
 
     /**
@@ -56,6 +57,20 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return type == that.type && color == that.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, color, firstMove);
     }
 
     /**

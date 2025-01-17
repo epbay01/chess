@@ -1,9 +1,6 @@
 package chess.moveCalculators;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.HashSet;
 
@@ -15,9 +12,9 @@ public class MoveCalculator {
         possibleMoves = new HashSet<>();
         // get team color to determine direction
         if (board.getPiece(position).getTeamColor() == ChessGame.TeamColor.BLACK) {
-            direction = -1;
-        } else {
             direction = 1;
+        } else {
+            direction = -1;
         }
     }
 
@@ -40,11 +37,21 @@ public class MoveCalculator {
                     possibleMoves.add(new ChessMove(position, newPosition));
                     distance++;
                 } else { // break and move to next direction
+                    checkCapture(new ChessMove(position, newPosition), board);
                     clearPath = false;
                 }
 
             } catch (IllegalArgumentException e) { // reached end of board
                 clearPath = false;
+            }
+        }
+    }
+
+    void checkCapture(ChessMove move, ChessBoard board) {
+        if (board.getPiece(move.getEndPosition()) != null) {
+            ChessGame.TeamColor thisColor = board.getPiece(move.getStartPosition()).getTeamColor();
+            if (thisColor != board.getPiece(move.getEndPosition()).getTeamColor()) {
+                possibleMoves.add(move);
             }
         }
     }

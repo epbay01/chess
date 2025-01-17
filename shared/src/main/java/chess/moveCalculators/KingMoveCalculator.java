@@ -10,9 +10,15 @@ public class KingMoveCalculator extends MoveCalculator {
 
         for (int row = position.getRow() - 1; row <= position.getRow() + 1; row++) {
             for (int column = position.getColumn() - 1; column <= position.getColumn() + 1; column++) {
-                ChessPosition current = new ChessPosition(row, column);
-                if (!current.equals(position) && !board.hasPiece(current)) {
-                    possibleMoves.add(new ChessMove(position, current));
+                try {
+                    ChessPosition current = new ChessPosition(row, column);
+                    if (!current.equals(position) && !board.hasPiece(current)) {
+                        possibleMoves.add(new ChessMove(position, current));
+                    } else if (!current.equals(position)) {
+                        checkCapture(new ChessMove(position, current), board);
+                    }
+                } catch (IllegalArgumentException e) {
+                    continue;
                 }
             }
         }
