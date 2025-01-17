@@ -12,6 +12,7 @@ public class MoveCalculator {
     int direction;
 
     public MoveCalculator(ChessPosition position, ChessBoard board) {
+        possibleMoves = new HashSet<>();
         // get team color to determine direction
         if (board.getPiece(position).getTeamColor() == ChessGame.TeamColor.BLACK) {
             direction = -1;

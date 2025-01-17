@@ -61,6 +61,14 @@ public class ChessPosition {
     @Override
     public String toString() {
         if (piece == null) {
+            return "(" + row + "," + col + ")";
+        } else {
+            return piece.toString() + " at (" + row + "," + col + ")";
+        }
+    }
+
+    public String toStringAlt() {
+        if (piece == null) {
             return "| |";
         } else {
             return String.format("|%s|", piece.toString());

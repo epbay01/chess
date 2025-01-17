@@ -4,6 +4,7 @@ import chess.moveCalculators.*;
 
 import javax.management.BadAttributeValueExpException;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Represents a single chess piece
@@ -75,7 +76,8 @@ public class ChessPiece {
                 KingMoveCalculator kingMoveCalculator = new KingMoveCalculator(myPosition, board);
                 return kingMoveCalculator.getPossibleMoves();
             case QUEEN:
-                 break;
+                QueenMoveCalculator queenMoveCalculator = new QueenMoveCalculator(myPosition, board);
+                return queenMoveCalculator.getPossibleMoves();
             case BISHOP:
                  break;
             case KNIGHT:
@@ -83,7 +85,7 @@ public class ChessPiece {
             case ROOK:
                  break;
         }
-        throw new RuntimeException("Not implemented");
+        return new HashSet<ChessMove>();
     }
 
     @Override

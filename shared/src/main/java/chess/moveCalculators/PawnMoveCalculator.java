@@ -14,15 +14,16 @@ public class PawnMoveCalculator extends MoveCalculator {
 
         ChessPosition position1 = new ChessPosition(position.getRow() + direction, position.getColumn());
 
-        if (firstMove) {
-            ChessPosition position2 = new ChessPosition(position.getRow() + (2 * direction), position.getColumn());
-            if (board.getPiece(position2) != null) {
-                possibleMoves.add(new ChessMove(position, position2));
-            }
-        }
-
         if (board.getPiece(position1) != null) {
             possibleMoves.add(new ChessMove(position, position1));
+
+            // possible two spaces if not blocked on first one
+            if (firstMove) {
+                ChessPosition position2 = new ChessPosition(position.getRow() + (2 * direction), position.getColumn());
+                if (board.getPiece(position2) != null) {
+                    possibleMoves.add(new ChessMove(position, position2));
+                }
+            }
         }
     }
 }
