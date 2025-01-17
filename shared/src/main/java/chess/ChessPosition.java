@@ -63,7 +63,7 @@ public class ChessPosition {
         if (piece == null) {
             return "(" + row + "," + col + ")";
         } else {
-            return piece.toString() + " at (" + row + "," + col + ")";
+            return piece + " at (" + row + "," + col + ")";
         }
     }
 
@@ -71,7 +71,7 @@ public class ChessPosition {
         if (piece == null) {
             return "| |";
         } else {
-            return String.format("|%s|", piece.toString());
+            return String.format("|%s|", piece);
         }
     }
 

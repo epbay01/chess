@@ -36,7 +36,7 @@ public class MoveCalculator {
                 ChessPosition newPosition = new ChessPosition(position.getRow() + (distance * rowChange),
                         position.getColumn() + (distance * columnChange));
 
-                if (board.getPiece(newPosition) == null) { // no piece
+                if (!board.hasPiece(newPosition)) { // no piece
                     possibleMoves.add(new ChessMove(position, newPosition));
                     distance++;
                 } else { // break and move to next direction

@@ -2,7 +2,6 @@ package chess;
 
 import chess.moveCalculators.*;
 
-import javax.management.BadAttributeValueExpException;
 import java.util.Collection;
 import java.util.HashSet;
 
