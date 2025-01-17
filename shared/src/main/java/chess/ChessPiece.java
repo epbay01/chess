@@ -58,19 +58,18 @@ public class ChessPiece {
         switch (type) {
             case PAWN:
                  break;
-             case KING:
+            case KING:
                  break;
-             case QUEEN:
+            case QUEEN:
                  break;
-             case BISHOP:
+            case BISHOP:
                  break;
-             case KNIGHT:
+            case KNIGHT:
                  break;
-             case ROOK:
+            case ROOK:
                  break;
-             default:
-                 throw new BadAttributeValueException();
         }
+        throw new RuntimeException("Not implemented");
     }
 
     @Override
@@ -112,6 +111,8 @@ public class ChessPiece {
                 } else {
                     return "P";
                 }
+            default:
+                return " ";
         }
     }
 }
