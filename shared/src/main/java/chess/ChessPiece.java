@@ -14,10 +14,22 @@ import java.util.Collection;
 public class ChessPiece {
     PieceType type;
     ChessGame.TeamColor color;
+    boolean firstMove; // for pawns only
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.type = type;
         this.color = pieceColor;
+        if (type == PieceType.PAWN) { // default pawns to their first move
+            firstMove = true;
+        } else {
+            firstMove = false;
+        }
+    }
+
+    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, boolean firstMove) {
+        this.type = type;
+        this.color = pieceColor;
+        this.firstMove = firstMove;
     }
 
     /**
