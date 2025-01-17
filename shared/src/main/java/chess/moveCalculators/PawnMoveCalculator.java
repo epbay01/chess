@@ -9,16 +9,20 @@ import java.util.HashSet;
 
 public class PawnMoveCalculator extends MoveCalculator {
 
-    public PawnMoveCalculator(ChessPosition position, ChessBoard board) {
+    public PawnMoveCalculator(ChessPosition position, ChessBoard board, boolean firstMove) {
         super(position, board);
 
         ChessPosition position1 = new ChessPosition(position.getRow() + direction, position.getColumn());
-        ChessPosition position2 = new ChessPosition(position.getRow() + (2 * direction), position.getColumn());
+
+        if (firstMove) {
+            ChessPosition position2 = new ChessPosition(position.getRow() + (2 * direction), position.getColumn());
+            if (board.getPiece(position2) != null) {
+                possibleMoves.add(new ChessMove(position, position2));
+            }
+        }
+
         if (board.getPiece(position1) != null) {
             possibleMoves.add(new ChessMove(position, position1));
-        }
-        if (board.getPiece(position2) != null) {
-            possibleMoves.add(new ChessMove(position, position2));
         }
     }
 }

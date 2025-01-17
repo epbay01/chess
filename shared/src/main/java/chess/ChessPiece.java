@@ -69,7 +69,7 @@ public class ChessPiece {
 
         switch (type) {
             case PAWN:
-                PawnMoveCalculator pawnMoveCalculator = new PawnMoveCalculator(myPosition, board);
+                PawnMoveCalculator pawnMoveCalculator = new PawnMoveCalculator(myPosition, board, firstMove);
                 return pawnMoveCalculator.getPossibleMoves();
             case KING:
                 KingMoveCalculator kingMoveCalculator = new KingMoveCalculator(myPosition, board);
