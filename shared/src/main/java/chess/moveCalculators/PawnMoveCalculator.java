@@ -15,8 +15,10 @@ public class PawnMoveCalculator extends MoveCalculator {
             return;
         }
 
+        checkPawnCapture(new ChessMove(position, position1), board);
         if (!board.hasPiece(position1)) {
             possibleMoves.add(new ChessMove(position, position1));
+            checkPromotion(new ChessMove(position, position1));
 
             // possible two spaces if not blocked on first one
             ChessPosition position2;
@@ -31,26 +33,37 @@ public class PawnMoveCalculator extends MoveCalculator {
                 if (!board.hasPiece(position2)) {
                     possibleMoves.add(new ChessMove(position, position2));
                 }
-                checkCapture(new ChessMove(position, position2), board);
             }
-            checkCapture(new ChessMove(position, position1), board);
         }
     }
 
     // checks diagonal moves using regular check and calculations
-    @Override
-    void checkCapture(ChessMove move, ChessBoard board) {
+    void checkPawnCapture(ChessMove move, ChessBoard board) {
         ChessPosition diagLeft;
         try {
             diagLeft = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn() - 1);
             ChessMove move1 = new ChessMove(move.getStartPosition(), diagLeft);
-            super.checkCapture(move1, board);
+            if (super.checkCapture(move1, board)) {
+                checkPromotion(move1);
+            }
         } catch (IllegalArgumentException ignored) {}
 
         try {
             ChessPosition diagRight = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn() + 1);
             ChessMove move2 = new ChessMove(move.getStartPosition(), diagRight);
-            super.checkCapture(move2, board);
+            if (super.checkCapture(move2, board)) {
+                checkPromotion(move2);
+            }
         } catch (IllegalArgumentException ignored) {}
+    }
+
+    void checkPromotion(ChessMove move) {
+        if (move.getEndPosition().getRow() == 1 || move.getEndPosition().getRow() == 8) {
+            possibleMoves.remove(move);
+            possibleMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.QUEEN));
+            possibleMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.KNIGHT));
+            possibleMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.ROOK));
+            possibleMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.BISHOP));
+        }
     }
 }

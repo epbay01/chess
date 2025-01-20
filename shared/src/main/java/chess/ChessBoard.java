@@ -32,6 +32,9 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
+        if ((position.getRow() == 2  || position.getRow() == 7) && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            piece.setFirstMove(true);
+        }
         board[8 - position.getRow()][position.getColumn() - 1].setPiece(piece);
     }
 

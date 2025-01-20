@@ -51,16 +51,18 @@ public class MoveCalculator {
         // System.out.println("set after: " + possibleMoves);
     }
 
-    void checkCapture(ChessMove move, ChessBoard board) {
+    boolean checkCapture(ChessMove move, ChessBoard board) {
         System.out.println("current board state:\n" + board);
         System.out.println("checking move: " + move);
 
         if (board.getPiece(move.getEndPosition()) != null) {
             ChessGame.TeamColor thisColor = board.getPiece(move.getStartPosition()).getTeamColor();
             if (thisColor != board.getPiece(move.getEndPosition()).getTeamColor()) {
-                System.out.println("added move");
-                possibleMoves.add(move);
+                System.out.println("added move\n");
+                return possibleMoves.add(move);
             }
         }
+
+        return false;
     }
 }

@@ -20,11 +20,11 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.type = type;
         this.color = pieceColor;
-        if (type == PieceType.PAWN) {
-            firstMove = true;
-        } else {
+        //if (type == PieceType.PAWN) {
+        //    firstMove = true;
+        //} else {
             firstMove = false;
-        }
+        //}
     }
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, boolean firstMove) {
@@ -61,6 +61,10 @@ public class ChessPiece {
      */
     public PieceType getPieceType() {
         return type;
+    }
+
+    public void setFirstMove(boolean firstMove) {
+        this.firstMove = firstMove;
     }
 
     @Override
