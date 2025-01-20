@@ -12,9 +12,9 @@ public class MoveCalculator {
         possibleMoves = new HashSet<>();
         // get team color to determine direction
         if (board.getPiece(position).getTeamColor() == ChessGame.TeamColor.BLACK) {
-            direction = 1;
-        } else {
             direction = -1;
+        } else {
+            direction = 1;
         }
     }
 
@@ -26,6 +26,8 @@ public class MoveCalculator {
     void checkAlongDirection(ChessPosition position, ChessBoard board, int rowChange, int columnChange) {
         boolean clearPath = true;
         int distance = 1;
+
+        // System.out.println("checking direction (" + rowChange + "," + columnChange + "), set before: " + possibleMoves);
 
         while (clearPath) {
             // takes direction vector and multiplies by number of iterations (distance)
@@ -45,12 +47,18 @@ public class MoveCalculator {
                 clearPath = false;
             }
         }
+
+        // System.out.println("set after: " + possibleMoves);
     }
 
     void checkCapture(ChessMove move, ChessBoard board) {
+        System.out.println("current board state:\n" + board);
+        System.out.println("checking move: " + move);
+
         if (board.getPiece(move.getEndPosition()) != null) {
             ChessGame.TeamColor thisColor = board.getPiece(move.getStartPosition()).getTeamColor();
             if (thisColor != board.getPiece(move.getEndPosition()).getTeamColor()) {
+                System.out.println("added move");
                 possibleMoves.add(move);
             }
         }

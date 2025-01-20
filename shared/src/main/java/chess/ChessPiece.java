@@ -20,7 +20,11 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.type = type;
         this.color = pieceColor;
-        firstMove = false;
+        if (type == PieceType.PAWN) {
+            firstMove = true;
+        } else {
+            firstMove = false;
+        }
     }
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type, boolean firstMove) {
@@ -93,11 +97,14 @@ public class ChessPiece {
                 QueenMoveCalculator queenMoveCalculator = new QueenMoveCalculator(myPosition, board);
                 return queenMoveCalculator.getPossibleMoves();
             case BISHOP:
-                 break;
+                BishopMoveCalculator bishopMoveCalculator = new BishopMoveCalculator(myPosition, board);
+                return bishopMoveCalculator.getPossibleMoves();
             case KNIGHT:
-                 break;
+                KnightMoveCalculator knightMoveCalculator = new KnightMoveCalculator(myPosition, board);
+                return knightMoveCalculator.getPossibleMoves();
             case ROOK:
-                 break;
+                RookMoveCalculator rookMoveCalculator = new RookMoveCalculator(myPosition, board);
+                return rookMoveCalculator.getPossibleMoves();
         }
         return new HashSet<ChessMove>();
     }
