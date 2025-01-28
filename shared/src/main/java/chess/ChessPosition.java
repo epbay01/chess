@@ -9,31 +9,16 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPosition {
-    int row;
-    int col;
-    ChessPiece piece;
-
-    public ChessPosition(int row, int col, ChessPiece piece) {
-        if (row < 1 || col < 1 || row > 8 || col > 8) {
-            throw new IllegalArgumentException();
-        }
-        this.row = row;
-        this.col = col;
-        this.piece = piece;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(row, col, piece);
-    }
+    private final int row;
+    private final int column;
 
     public ChessPosition(int row, int col) {
-        if (row < 1 || col < 1 || row > 8 || col > 8) {
-            throw new IllegalArgumentException();
+        if (row <= 8 && row >= 1 && col <= 8 && col >= 1) {
+            this.row = row;
+            this.column = col;
+        } else {
+            throw new IllegalArgumentException("Invalid position");
         }
-        this.row = row;
-        this.col = col;
-        this.piece = null;
     }
 
     /**
@@ -49,48 +34,28 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return col;
-    }
-
-    public ChessPiece getPiece() { return piece; }
-
-    public void setPiece(ChessPiece piece) { this.piece = piece; }
-
-    public boolean hasPiece() { return piece != null; }
-
-    @Override
-    public String toString() {
-        if (piece == null) {
-            return "(" + row + "," + col + ")";
-        } else {
-            return piece + " at (" + row + "," + col + ")";
-        }
-    }
-
-    public String toStringAlt() {
-        if (piece == null) {
-            return "| |";
-        } else {
-            return String.format("|%s|", piece);
-        }
+        return column;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == null) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if (o == this) {
-            return true;
-        }
+        ChessPosition that = (ChessPosition) o;
+        return row == that.row && column == that.column;
+    }
 
-        ChessPosition other;
-        if (o.getClass().equals(this.getClass())) {
-            other = (ChessPosition)o;
-        } else {
-            return false;
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, column);
+    }
 
-        return other.getRow() == this.getRow() && other.getColumn() == this.getColumn();
+    @Override
+    public String toString() {
+        return "ChessPosition{" +
+                "row=" + row +
+                ", column=" + column +
+                '}';
     }
 }
