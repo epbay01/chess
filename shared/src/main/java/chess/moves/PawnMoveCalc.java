@@ -1,4 +1,4 @@
-package chess.moveCalculators;
+package chess.moves;
 
 import chess.*;
 
@@ -15,14 +15,12 @@ public class PawnMoveCalc extends MoveCalc {
             ChessMove move1 = new ChessMove(position, end1);
 
             checkCaptures(direction);
-            if (checkMove(move1)) {
-                if (piece.isFirstMove()) {
-                    try {
-                        ChessPosition end2 = new ChessPosition(position.getRow() + (2 * direction), position.getColumn());
-                        ChessMove move2 = new ChessMove(position, end2);
-                        checkMove(move2);
-                    } catch (IllegalArgumentException ignored) {
-                    }
+            if (checkMove(move1) && piece.isFirstMove()) {
+                try {
+                    ChessPosition end2 = new ChessPosition(position.getRow() + (2 * direction), position.getColumn());
+                    ChessMove move2 = new ChessMove(position, end2);
+                    checkMove(move2);
+                } catch (IllegalArgumentException ignored) {
                 }
             }
         } catch (Exception ignored) {}

@@ -35,6 +35,19 @@ public class ChessBoard {
         if ((position.getRow() == 2 || position.getRow() == 7) && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             piece.setFirstMove(true);
         }
+
+        // sets king and rook also, for castling
+
+        ChessPosition kingPos1 = new ChessPosition(1, 5);
+        ChessPosition kingPos2 = new ChessPosition(8, 5);
+        if (piece.getPieceType() == ChessPiece.PieceType.KING && (position.equals(kingPos1) || position.equals(kingPos2))) {
+            piece.setFirstMove(true);
+        }
+
+        boolean corner = (position.getRow() == position.getColumn()) && (position.getRow() == 1 || position.getRow() == 8);
+        if (piece.getPieceType() == ChessPiece.PieceType.ROOK && corner) {
+            piece.setFirstMove(true);
+        }
     }
 
     /**
@@ -66,10 +79,10 @@ public class ChessBoard {
         }
 
         // rooks
-        board[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-        board[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-        board[7][0] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
-        board[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        board[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK, true);
+        board[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK, true);
+        board[7][0] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK, true);
+        board[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK, true);
 
         // knight
         board[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
@@ -88,8 +101,8 @@ public class ChessBoard {
         board[7][3] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
 
         // kings
-        board[0][4] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
-        board[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+        board[0][4] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING, true);
+        board[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING, true);
     }
 
     @Override

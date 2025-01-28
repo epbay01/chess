@@ -1,4 +1,4 @@
-package chess.moveCalculators;
+package chess.moves;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -15,9 +15,7 @@ public class KingMoveCalc extends MoveCalc {
                 try {
                     ChessPosition newPosition = new ChessPosition(position.getRow() + i, position.getColumn() + j);
                     ChessMove move = new ChessMove(position, newPosition);
-                    if (!checkMove(move)) {
-                        checkCapture(move);
-                    }
+                    if (!checkMove(move)) { checkCapture(move); }
                 }
                 catch (Exception ignored) {}
             }

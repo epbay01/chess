@@ -1,4 +1,4 @@
-package chess.moveCalculators;
+package chess.moves;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -6,7 +6,7 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 
 public class KnightMoveCalc extends MoveCalc {
-    final int[][] POSSIBLE_DIFF = {
+    static final int[][] POSSIBLE_DIFF = {
             {-2, -1}, {-2, 1}, {2, -1}, {2, 1}, {-1, -2}, {1, -2}, {-1, 2}, {1, 2}
     };
 
@@ -17,9 +17,7 @@ public class KnightMoveCalc extends MoveCalc {
             try {
                 ChessPosition newPosition = new ChessPosition(position.getRow() + pos[0], position.getColumn() + pos[1]);
                 ChessMove move = new ChessMove(position, newPosition);
-                if (!checkMove(move)) {
-                    checkCapture(move);
-                }
+                if (!checkMove(move)) { checkCapture(move); }
             } catch (Exception ignored) {}
         }
     }
