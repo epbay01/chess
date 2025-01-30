@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -21,6 +22,10 @@ public class ChessBoard {
                 board[i][j] = null;
             }
         }
+    }
+
+    public ChessBoard(ChessBoard original) {
+        board = original.board.clone();
     }
 
     /**

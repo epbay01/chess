@@ -116,4 +116,9 @@ public class ChessPiece {
 
         return Character.toString(typeChar);
     }
+
+    @Override
+    public ChessPiece clone() {
+        return new ChessPiece(this.teamColor, this.pieceType, this.firstMove);
+    }
 }

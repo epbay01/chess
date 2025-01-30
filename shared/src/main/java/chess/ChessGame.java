@@ -69,6 +69,8 @@ public class ChessGame {
         // - be the right team color (it's their turn)
         // - in the board state after the move, doesn't leave the king in check (regardless of if he starts in check)
         // - be in the possible set of moves
+        ChessBoard newBoard = new ChessBoard(board);
+
         return moveSet;
     }
 
@@ -145,10 +147,10 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
-    protected void checkForCheck(ChessMove move, TeamColor teamColor) {
+    protected void checkForCheckFromMove(ChessMove move, TeamColor teamColor) {
         // iterate through the next possible valid moves after this
+        setCheck(teamColor, false);
         for (ChessMove m : validMoves(move.getEndPosition())) {
-            setCheck(teamColor, false);
             ChessPiece end = board.getPiece(m.getEndPosition());
 
             // if the end has a king, we already checked it's a different color in the move calculator
