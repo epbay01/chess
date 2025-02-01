@@ -25,7 +25,13 @@ public class ChessBoard {
     }
 
     public ChessBoard(ChessBoard original) {
-        board = original.board.clone();
+        board = new ChessPiece[8][8];
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                this.board[i][j] = original.board[i][j] != null ? original.board[i][j].clone() : null;
+            }
+        }
     }
 
     /**
@@ -37,21 +43,23 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getRow() - 1][position.getColumn() - 1] = piece;
 
-        if ((position.getRow() == 2 || position.getRow() == 7) && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            piece.setFirstMove(true);
-        }
+        if (piece != null) {
+            if ((position.getRow() == 2 || position.getRow() == 7) && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                piece.setFirstMove(true);
+            }
 
-        // sets king and rook also, for castling
+            // sets king and rook also, for castling
 
-        ChessPosition kingPos1 = new ChessPosition(1, 5);
-        ChessPosition kingPos2 = new ChessPosition(8, 5);
-        if (piece.getPieceType() == ChessPiece.PieceType.KING && (position.equals(kingPos1) || position.equals(kingPos2))) {
-            piece.setFirstMove(true);
-        }
+            ChessPosition kingPos1 = new ChessPosition(1, 5);
+            ChessPosition kingPos2 = new ChessPosition(8, 5);
+            if (piece.getPieceType() == ChessPiece.PieceType.KING && (position.equals(kingPos1) || position.equals(kingPos2))) {
+                piece.setFirstMove(true);
+            }
 
-        boolean corner = (position.getRow() == position.getColumn()) && (position.getRow() == 1 || position.getRow() == 8);
-        if (piece.getPieceType() == ChessPiece.PieceType.ROOK && corner) {
-            piece.setFirstMove(true);
+            boolean corner = (position.getRow() == position.getColumn()) && (position.getRow() == 1 || position.getRow() == 8);
+            if (piece.getPieceType() == ChessPiece.PieceType.ROOK && corner) {
+                piece.setFirstMove(true);
+            }
         }
     }
 
@@ -145,6 +153,7 @@ public class ChessBoard {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 7; i >= 0; i--) {
+            sb.append(i + 1).append(" ");
             for (int j = 0; j < 8; j++) {
                 sb.append("|");
                 if (board[i][j] != null) {
@@ -158,5 +167,10 @@ public class ChessBoard {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public ChessBoard clone() {
+        return new ChessBoard(this);
     }
 }

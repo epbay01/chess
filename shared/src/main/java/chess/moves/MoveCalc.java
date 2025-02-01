@@ -14,7 +14,7 @@ public class MoveCalc {
     protected HashSet<ChessMove> possibleMoves;
 
     public MoveCalc(ChessPiece piece, ChessBoard board, ChessPosition position) {
-        System.out.print("board:\n" + board);
+        // System.out.print("board:\n" + board);
 
         this.piece = piece;
         this.board = board;
@@ -28,7 +28,7 @@ public class MoveCalc {
 
     protected boolean checkMove(ChessMove move) {
         if (board.getPiece(move.getEndPosition()) == null) {
-            System.out.println("adding move to " + move.getEndPosition());
+            // System.out.println("adding move to " + move.getEndPosition());
             return possibleMoves.add(move);
         }
         return false;

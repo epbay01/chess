@@ -57,6 +57,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        System.out.print("getting valid moves for position " + startPosition + " on board:\n" + board);
         // no piece, null
         if (board.getPiece(startPosition) == null) {
             return null;
@@ -77,6 +78,7 @@ public class ChessGame {
         for (ChessMove move : moveSet) {
             if (checkForSelfCheck(move, turn)) {
                 validMoveSet.remove(move);
+                System.out.println(move + " is not valid");
             }
         }
 
@@ -96,12 +98,14 @@ public class ChessGame {
         }
 
         // modify the board
+        ChessPiece movingPiece = board.getPiece(move.getStartPosition());
+        board.addPiece(move.getStartPosition(), null);
+        board.addPiece(move.getEndPosition(), movingPiece);
 
         // check for enemy check
         TeamColor enemy = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
         checkForEnemyCheck(move, enemy);
-
-        throw new RuntimeException("Not implemented");
+        return;
     }
 
     /**
@@ -177,35 +181,40 @@ public class ChessGame {
         newBoard.addPiece(move.getStartPosition(), null);
         newBoard.addPiece(move.getEndPosition(), movingPiece);
 
+        System.out.print("checking for self check. board after move " + move + ":\n" + newBoard);
+
         /*
-        if we act as if the king is a queen, rook, etc. and check if any captures are a matching type
-        it implies that that piece is able to capture the king, and thus we are in check
+        we act as if the king is a queen, rook, etc. and check if any captures end in a matching piece type
+        two identical pieces can always capture each other, thus if the king acts as another piece and can
+        capture it, the other piece is able to capture the king, and we are in check
          */
-        ChessPosition kingPosition = board.findKing(teamColor);
+        ChessPosition kingPosition = newBoard.findKing(teamColor);
         for (ChessPiece.PieceType type : ChessPiece.PieceType.values()) {
-            if (checkMoveCalc(type, kingPosition)) {
+            if (checkMoveCalc(type, kingPosition, newBoard)) {
                 return true;
             }
         }
         return false;
     }
 
-    protected boolean checkMoveCalc(ChessPiece.PieceType pieceType, ChessPosition kingPosition) {
+    protected boolean checkMoveCalc(ChessPiece.PieceType pieceType, ChessPosition kingPosition, ChessBoard newBoard) {
+        System.out.println("checking for " + pieceType + " on king at " + kingPosition);
         MoveCalc moveCalc;
         moveCalc = switch (pieceType) {
-            case PAWN -> new PawnMoveCalc(board.getPiece(kingPosition), board, kingPosition);
-            case QUEEN -> new QueenMoveCalc(board.getPiece(kingPosition), board, kingPosition);
-            case ROOK -> new RookMoveCalc(board.getPiece(kingPosition), board, kingPosition);
-            case BISHOP -> new BishopMoveCalc(board.getPiece(kingPosition), board, kingPosition);
-            case KING -> new KingMoveCalc(board.getPiece(kingPosition), board, kingPosition);
-            case KNIGHT -> new KnightMoveCalc(board.getPiece(kingPosition), board, kingPosition);
-            default -> new MoveCalc(board.getPiece(kingPosition), board, kingPosition);
+            case PAWN -> new PawnMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
+            case QUEEN -> new QueenMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
+            case ROOK -> new RookMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
+            case BISHOP -> new BishopMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
+            case KING -> new KingMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
+            case KNIGHT -> new KnightMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
+            default -> new MoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
         };
 
         // for all the moves, if one results in a matching piece it is a capture and they can capture the king
         for (ChessMove move : moveCalc.getMoves()) {
-            ChessPiece endPiece = board.getPiece(move.getEndPosition());
+            ChessPiece endPiece = newBoard.getPiece(move.getEndPosition());
             if (endPiece != null && endPiece.getPieceType() == pieceType) {
+                System.out.println("self check, reverse move is " + move);
                 return true;
             }
         }
