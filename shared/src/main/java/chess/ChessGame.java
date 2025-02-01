@@ -1,5 +1,7 @@
 package chess;
 
+import chess.moves.*;
+
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -65,13 +67,20 @@ public class ChessGame {
         }
 
         HashSet<ChessMove> moveSet = (HashSet<ChessMove>) board.getPiece(startPosition).pieceMoves(board, startPosition);
+        HashSet<ChessMove> validMoveSet = (HashSet<ChessMove>) moveSet.clone();
         // move must:
         // - be the right team color (it's their turn)
         // - in the board state after the move, doesn't leave the king in check (regardless of if he starts in check)
         // - be in the possible set of moves
-        ChessBoard newBoard = new ChessBoard(board);
+        // this algorithm takes the moveset for the piece, check for color,
+        // then iterates thru, removing any ones resulting is self check
+        for (ChessMove move : moveSet) {
+            if (checkForSelfCheck(move, turn)) {
+                validMoveSet.remove(move);
+            }
+        }
 
-        return moveSet;
+        return validMoveSet;
     }
 
     /**
@@ -88,7 +97,9 @@ public class ChessGame {
 
         // modify the board
 
-        // check for check
+        // check for enemy check
+        TeamColor enemy = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        checkForEnemyCheck(move, enemy);
 
         throw new RuntimeException("Not implemented");
     }
@@ -147,17 +158,58 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
-    protected void checkForCheckFromMove(ChessMove move, TeamColor teamColor) {
+    protected void checkForEnemyCheck(ChessMove move, TeamColor enemyColor) {
         // iterate through the next possible valid moves after this
-        setCheck(teamColor, false);
+        setCheck(enemyColor, false);
         for (ChessMove m : validMoves(move.getEndPosition())) {
             ChessPiece end = board.getPiece(m.getEndPosition());
 
             // if the end has a king, we already checked it's a different color in the move calculator
             if(end != null && end.getPieceType() == ChessPiece.PieceType.KING) {
-                setCheck(teamColor, true);
+                setCheck(enemyColor, true);
             }
         }
+    }
+
+    protected boolean checkForSelfCheck(ChessMove move, TeamColor teamColor) {
+        ChessBoard newBoard = new ChessBoard(board);
+        ChessPiece movingPiece = board.getPiece(move.getStartPosition());
+        newBoard.addPiece(move.getStartPosition(), null);
+        newBoard.addPiece(move.getEndPosition(), movingPiece);
+
+        /*
+        if we act as if the king is a queen, rook, etc. and check if any captures are a matching type
+        it implies that that piece is able to capture the king, and thus we are in check
+         */
+        ChessPosition kingPosition = board.findKing(teamColor);
+        for (ChessPiece.PieceType type : ChessPiece.PieceType.values()) {
+            if (checkMoveCalc(type, kingPosition)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean checkMoveCalc(ChessPiece.PieceType pieceType, ChessPosition kingPosition) {
+        MoveCalc moveCalc;
+        moveCalc = switch (pieceType) {
+            case PAWN -> new PawnMoveCalc(board.getPiece(kingPosition), board, kingPosition);
+            case QUEEN -> new QueenMoveCalc(board.getPiece(kingPosition), board, kingPosition);
+            case ROOK -> new RookMoveCalc(board.getPiece(kingPosition), board, kingPosition);
+            case BISHOP -> new BishopMoveCalc(board.getPiece(kingPosition), board, kingPosition);
+            case KING -> new KingMoveCalc(board.getPiece(kingPosition), board, kingPosition);
+            case KNIGHT -> new KnightMoveCalc(board.getPiece(kingPosition), board, kingPosition);
+            default -> new MoveCalc(board.getPiece(kingPosition), board, kingPosition);
+        };
+
+        // for all the moves, if one results in a matching piece it is a capture and they can capture the king
+        for (ChessMove move : moveCalc.getMoves()) {
+            ChessPiece endPiece = board.getPiece(move.getEndPosition());
+            if (endPiece != null && endPiece.getPieceType() == pieceType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
