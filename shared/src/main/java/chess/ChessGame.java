@@ -102,10 +102,12 @@ public class ChessGame {
         board.addPiece(move.getStartPosition(), null);
         board.addPiece(move.getEndPosition(), movingPiece);
 
-        // check for enemy check
-        TeamColor enemy = turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
-        checkForEnemyCheck(move, enemy);
-        return;
+        // check for enemy check due to this move
+        if (turn == TeamColor.WHITE) {
+            blackCheck = checkForEnemyCheck(move, TeamColor.BLACK);
+        } else {
+            whiteCheck = checkForEnemyCheck(move, TeamColor.WHITE);
+        }
     }
 
     /**
@@ -115,6 +117,10 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        // given the position of the king, checks if the team is in check
+        ChessPosition king = board.findKing(teamColor);
+        setCheck(teamColor, checkForSelfCheck(new ChessMove(king, king), teamColor));
+
         if (teamColor == TeamColor.WHITE) {
             return whiteCheck;
         } else {
@@ -137,15 +143,29 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        // can't be in checkmate if not in check
+        // can't be in checkmate if not in check, that is a stalemate
         if (!isInCheck(teamColor)) {
-            // would then call isInStalemate in caller
             return false;
         }
 
         // for each piece check for valid moves
+        HashSet<ChessMove> allMoves = getUnionTeamMoves();
         // if empty, return true, else false
-        throw new RuntimeException("Not implemented");
+        return allMoves.isEmpty();
+    }
+
+    private HashSet<ChessMove> getUnionTeamMoves() {
+        HashSet<ChessMove> unionValidMoves = new HashSet<ChessMove>();
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                // unions all valid moves of pieces
+                HashSet<ChessMove> set = (HashSet<ChessMove>) validMoves(new ChessPosition(i, j));
+                if (set != null) {
+                    unionValidMoves.addAll(set);
+                }
+            }
+        }
+        return unionValidMoves;
     }
 
     /**
@@ -156,23 +176,30 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        // for each piece in that color
-        // if valid moves is empty, true
-        // else return false
-        throw new RuntimeException("Not implemented");
+        // same conditions as checkmate (no possible moves) but not in check
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+        // for each piece check for valid moves
+        HashSet<ChessMove> allMoves = getUnionTeamMoves();
+        // if empty, return true, else false
+        return allMoves.isEmpty();
     }
 
-    protected void checkForEnemyCheck(ChessMove move, TeamColor enemyColor) {
+    protected boolean checkForEnemyCheck(ChessMove move, TeamColor enemyColor) {
         // iterate through the next possible valid moves after this
-        setCheck(enemyColor, false);
+        boolean checkFromThis = false;
+
         for (ChessMove m : validMoves(move.getEndPosition())) {
             ChessPiece end = board.getPiece(m.getEndPosition());
 
             // if the end has a king, we already checked it's a different color in the move calculator
             if(end != null && end.getPieceType() == ChessPiece.PieceType.KING) {
-                setCheck(enemyColor, true);
+                checkFromThis = true;
             }
         }
+
+        return checkFromThis;
     }
 
     protected boolean checkForSelfCheck(ChessMove move, TeamColor teamColor) {
