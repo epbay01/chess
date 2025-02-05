@@ -37,7 +37,7 @@ public class MoveCalc {
     protected boolean checkCapture(ChessMove move) {
         if (board.getPiece(move.getEndPosition()) != null) {
             if (board.getPiece(move.getEndPosition()).getTeamColor() != piece.getTeamColor()) {
-                System.out.println("adding capture to " + move.getEndPosition());
+                // System.out.println("adding capture to " + move.getEndPosition());
                 return possibleMoves.add(move);
             }
         }
@@ -57,8 +57,6 @@ public class MoveCalc {
                 return;
             }
             _checkDirection(rowDir, colDir, newPosition);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
+        } catch (IllegalArgumentException ignored) {}
     }
 }

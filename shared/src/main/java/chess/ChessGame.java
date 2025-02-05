@@ -57,28 +57,25 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        System.out.print("getting valid moves for position " + startPosition + " on board:\n" + board);
+//        System.out.println("getting valid moves for position " + startPosition);
         // no piece, null
         if (board.getPiece(startPosition) == null) {
             return null;
         }
-        // not your turn, empty set
-        if (board.getPiece(startPosition).getTeamColor() != turn) {
-            return new HashSet<ChessMove>();
-        }
+//        // not your turn, empty set
+//        if (board.getPiece(startPosition).getTeamColor() != turn) {
+//            return new HashSet<ChessMove>();
+//        }
 
         HashSet<ChessMove> moveSet = (HashSet<ChessMove>) board.getPiece(startPosition).pieceMoves(board, startPosition);
         HashSet<ChessMove> validMoveSet = (HashSet<ChessMove>) moveSet.clone();
         // move must:
-        // - be the right team color (it's their turn)
-        // - in the board state after the move, doesn't leave the king in check (regardless of if he starts in check)
-        // - be in the possible set of moves
-        // this algorithm takes the moveset for the piece, check for color,
+        // this algorithm takes the moveset for the piece
         // then iterates thru, removing any ones resulting is self check
         for (ChessMove move : moveSet) {
-            if (checkForSelfCheck(move, turn)) {
+            if (checkForSelfCheck(move, board.getPiece(move.getStartPosition()).getTeamColor())) {
                 validMoveSet.remove(move);
-                System.out.println(move + " is not valid");
+                // System.out.println(move + " is not valid");
             }
         }
 
@@ -92,7 +89,17 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        // check if move is valid
+        // space check
+        if (board.getPiece(move.getStartPosition()) == null) {
+            throw new InvalidMoveException("space has no piece");
+        }
+
+        // turn check
+        if (board.getPiece(move.getStartPosition()).getTeamColor() != turn) {
+            throw new InvalidMoveException("not your turn");
+        }
+
+        // move validity check
         if (!validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException(move + " is not a valid move");
         }
@@ -100,13 +107,21 @@ public class ChessGame {
         // modify the board
         ChessPiece movingPiece = board.getPiece(move.getStartPosition());
         board.addPiece(move.getStartPosition(), null);
-        board.addPiece(move.getEndPosition(), movingPiece);
-
-        // check for enemy check due to this move
-        if (turn == TeamColor.WHITE) {
-            blackCheck = checkForEnemyCheck(move, TeamColor.BLACK);
+        // promote if necessary and change value of firstMove
+        if (move.getPromotionPiece() != null) {
+            board.addPiece(move.getEndPosition(), new ChessPiece(turn, move.getPromotionPiece(), false));
         } else {
-            whiteCheck = checkForEnemyCheck(move, TeamColor.WHITE);
+            board.addPiece(move.getEndPosition(), movingPiece);
+        }
+        board.getPiece(move.getEndPosition()).setFirstMove(false);
+
+        // check for enemy check due to this move and change turn
+        if (turn == TeamColor.WHITE) {
+            blackCheck = checkForEnemyCheck(move);
+            turn = TeamColor.BLACK;
+        } else {
+            whiteCheck = checkForEnemyCheck(move);
+            turn = TeamColor.WHITE;
         }
     }
 
@@ -119,7 +134,9 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         // given the position of the king, checks if the team is in check
         ChessPosition king = board.findKing(teamColor);
+        System.out.println(king + " is king for " + teamColor);
         setCheck(teamColor, checkForSelfCheck(new ChessMove(king, king), teamColor));
+        System.out.println("white check: " + whiteCheck + ", black check: " + blackCheck);
 
         if (teamColor == TeamColor.WHITE) {
             return whiteCheck;
@@ -144,24 +161,27 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         // can't be in checkmate if not in check, that is a stalemate
+        System.out.print(board + "\n");
         if (!isInCheck(teamColor)) {
             return false;
         }
 
         // for each piece check for valid moves
-        HashSet<ChessMove> allMoves = getUnionTeamMoves();
+        HashSet<ChessMove> allMoves = getUnionTeamMoves(teamColor);
         // if empty, return true, else false
         return allMoves.isEmpty();
     }
 
-    private HashSet<ChessMove> getUnionTeamMoves() {
-        HashSet<ChessMove> unionValidMoves = new HashSet<ChessMove>();
+    private HashSet<ChessMove> getUnionTeamMoves(TeamColor teamColor) {
+        HashSet<ChessMove> unionValidMoves = new HashSet<>();
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 // unions all valid moves of pieces
-                HashSet<ChessMove> set = (HashSet<ChessMove>) validMoves(new ChessPosition(i, j));
-                if (set != null) {
-                    unionValidMoves.addAll(set);
+                ChessPosition curr = new ChessPosition(i,j);
+                if (board.getPiece(curr) != null && board.getPiece(curr).getTeamColor() == teamColor) {
+                    HashSet<ChessMove> set = (HashSet<ChessMove>) validMoves(curr);
+                    if (set != null) System.out.println("for (" + i + "," + j + "), valid moves are: " + set);
+                    if (set != null) unionValidMoves.addAll(set);
                 }
             }
         }
@@ -177,16 +197,17 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         // same conditions as checkmate (no possible moves) but not in check
+        System.out.print(board + "\n");
         if (isInCheck(teamColor)) {
             return false;
         }
         // for each piece check for valid moves
-        HashSet<ChessMove> allMoves = getUnionTeamMoves();
+        HashSet<ChessMove> allMoves = getUnionTeamMoves(teamColor);
         // if empty, return true, else false
         return allMoves.isEmpty();
     }
 
-    protected boolean checkForEnemyCheck(ChessMove move, TeamColor enemyColor) {
+    protected boolean checkForEnemyCheck(ChessMove move) {
         // iterate through the next possible valid moves after this
         boolean checkFromThis = false;
 
@@ -208,7 +229,7 @@ public class ChessGame {
         newBoard.addPiece(move.getStartPosition(), null);
         newBoard.addPiece(move.getEndPosition(), movingPiece);
 
-        System.out.print("checking for self check. board after move " + move + ":\n" + newBoard);
+        // System.out.print("checking for self check. board after move " + move + ":\n" + newBoard);
 
         /*
         we act as if the king is a queen, rook, etc. and check if any captures end in a matching piece type
@@ -218,6 +239,7 @@ public class ChessGame {
         ChessPosition kingPosition = newBoard.findKing(teamColor);
         for (ChessPiece.PieceType type : ChessPiece.PieceType.values()) {
             if (checkMoveCalc(type, kingPosition, newBoard)) {
+                System.out.println(move + " puts self in check");
                 return true;
             }
         }
@@ -225,7 +247,7 @@ public class ChessGame {
     }
 
     protected boolean checkMoveCalc(ChessPiece.PieceType pieceType, ChessPosition kingPosition, ChessBoard newBoard) {
-        System.out.println("checking for " + pieceType + " on king at " + kingPosition);
+        // System.out.println("checking for " + pieceType + " on king at " + kingPosition);
         MoveCalc moveCalc;
         moveCalc = switch (pieceType) {
             case PAWN -> new PawnMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
@@ -234,14 +256,13 @@ public class ChessGame {
             case BISHOP -> new BishopMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
             case KING -> new KingMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
             case KNIGHT -> new KnightMoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
-            default -> new MoveCalc(newBoard.getPiece(kingPosition), newBoard, kingPosition);
         };
 
         // for all the moves, if one results in a matching piece it is a capture and they can capture the king
         for (ChessMove move : moveCalc.getMoves()) {
             ChessPiece endPiece = newBoard.getPiece(move.getEndPosition());
             if (endPiece != null && endPiece.getPieceType() == pieceType) {
-                System.out.println("self check, reverse move is " + move);
+                // System.out.println("self check, reverse move is " + move);
                 return true;
             }
         }

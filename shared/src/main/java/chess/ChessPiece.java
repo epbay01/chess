@@ -79,7 +79,6 @@ public class ChessPiece {
             case BISHOP -> new BishopMoveCalc(this, board, myPosition);
             case KING -> new KingMoveCalc(this, board, myPosition);
             case KNIGHT -> new KnightMoveCalc(this, board, myPosition);
-            default -> new MoveCalc(this, board, myPosition);
         };
         return mc.getMoves();
     }
@@ -90,7 +89,7 @@ public class ChessPiece {
             return false;
         }
         ChessPiece that = (ChessPiece) o;
-        return firstMove == that.firstMove && pieceType == that.pieceType && teamColor == that.teamColor;
+        return pieceType == that.pieceType && teamColor == that.teamColor;
     }
 
     @Override
@@ -107,7 +106,6 @@ public class ChessPiece {
             case ROOK -> 'r';
             case BISHOP -> 'b';
             case KNIGHT -> 'n';
-            default -> ' ';
         };
 
         if (teamColor == ChessGame.TeamColor.WHITE) {

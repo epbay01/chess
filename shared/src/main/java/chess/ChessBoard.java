@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -56,7 +55,7 @@ public class ChessBoard {
                 piece.setFirstMove(true);
             }
 
-            boolean corner = (position.getRow() == position.getColumn()) && (position.getRow() == 1 || position.getRow() == 8);
+            boolean corner = (position.getColumn() == 1 || position.getColumn() == 8) && (position.getRow() == 1 || position.getRow() == 8);
             if (piece.getPieceType() == ChessPiece.PieceType.ROOK && corner) {
                 piece.setFirstMove(true);
             }
