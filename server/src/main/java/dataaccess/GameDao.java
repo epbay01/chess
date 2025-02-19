@@ -7,4 +7,5 @@ public interface GameDao {
     GameData[] listGames();
     GameData getGame(int id);
     void updateGame(GameData gameData);
+    void clear();
 }
