@@ -45,10 +45,10 @@ public class MoveCalc {
     }
 
     protected void checkDirection(int rowDir, int colDir) {
-        _checkDirection(rowDir, colDir, position);
+        checkDirectionHelper(rowDir, colDir, position);
     }
 
-    private void _checkDirection(int rowDir, int colDir, ChessPosition prev) {
+    private void checkDirectionHelper(int rowDir, int colDir, ChessPosition prev) {
         try {
             ChessPosition newPosition = new ChessPosition(prev.getRow() + rowDir, prev.getColumn() + colDir);
             ChessMove newMove = new ChessMove(position, newPosition);
@@ -56,7 +56,7 @@ public class MoveCalc {
                 checkCapture(newMove);
                 return;
             }
-            _checkDirection(rowDir, colDir, newPosition);
+            checkDirectionHelper(rowDir, colDir, newPosition);
         } catch (IllegalArgumentException ignored) {}
     }
 }

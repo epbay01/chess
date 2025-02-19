@@ -62,10 +62,6 @@ public class ChessGame {
         if (board.getPiece(startPosition) == null) {
             return null;
         }
-//        // not your turn, empty set
-//        if (board.getPiece(startPosition).getTeamColor() != turn) {
-//            return new HashSet<ChessMove>();
-//        }
 
         HashSet<ChessMove> moveSet = (HashSet<ChessMove>) board.getPiece(startPosition).pieceMoves(board, startPosition);
         HashSet<ChessMove> validMoveSet = (HashSet<ChessMove>) moveSet.clone();
@@ -180,8 +176,8 @@ public class ChessGame {
                 ChessPosition curr = new ChessPosition(i,j);
                 if (board.getPiece(curr) != null && board.getPiece(curr).getTeamColor() == teamColor) {
                     HashSet<ChessMove> set = (HashSet<ChessMove>) validMoves(curr);
-                    if (set != null) System.out.println("for (" + i + "," + j + "), valid moves are: " + set);
-                    if (set != null) unionValidMoves.addAll(set);
+                    // if (set != null) System.out.println("for (" + i + "," + j + "), valid moves are: " + set);
+                    if (set != null) { unionValidMoves.addAll(set); }
                 }
             }
         }
