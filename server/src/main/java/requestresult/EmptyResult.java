@@ -1,5 +1,5 @@
 package requestresult;
 
-public class EmptyResult {
+public class EmptyResult extends Result {
     public EmptyResult() { }
 }

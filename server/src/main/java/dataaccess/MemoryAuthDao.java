@@ -17,10 +17,12 @@ public class MemoryAuthDao implements AuthDao {
         this.db = db;
     }
 
+    @Override
     public void addAuth(AuthData authData) {
         db.add(authData);
     }
 
+    @Override
     public AuthData getAuth(String username) throws DataAccessException {
         for (AuthData authData : db) {
             if (authData.username().equals(username)) {
@@ -30,12 +32,24 @@ public class MemoryAuthDao implements AuthDao {
         throw new DataAccessException("Username not found");
     }
 
+    @Override
+    public AuthData getAuthByToken(String token) throws DataAccessException {
+        for (AuthData authData : db) {
+            if (authData.authToken().equals(token)) {
+                return authData;
+            }
+        }
+        throw new DataAccessException("Token not found");
+    }
+
+    @Override
     public void deleteAuth(String username) throws DataAccessException {
         if(!db.removeIf(authData -> authData.username().equals(username))) {
             throw new DataAccessException("Username not found");
         }
     }
 
+    @Override
     public void clear() {
         db.clear();
     }

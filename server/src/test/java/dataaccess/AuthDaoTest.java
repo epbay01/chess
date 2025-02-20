@@ -44,6 +44,20 @@ public class AuthDaoTest {
     }
 
     @Test
+    void testGetAuthByToken() {
+        AuthData result;
+        dao.addAuth(authData);
+        try {
+            result = dao.getAuthByToken("1234");
+        } catch (Exception e) {
+            Assertions.fail();
+            return;
+        }
+
+        Assertions.assertEquals(result, authData);
+    }
+
+    @Test
     void testDeleteAuth() {
         dao.addAuth(authData);
         try {
