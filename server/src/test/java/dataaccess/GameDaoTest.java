@@ -2,15 +2,14 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
-import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-public class MemoryGameDaoTest {
-    private MemoryGameDao dao;
+public class GameDaoTest {
+    private GameDao dao;
     private GameData gameData;
 
     @BeforeEach
