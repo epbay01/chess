@@ -31,7 +31,7 @@ public class MemoryGameDao implements GameDao {
                 return gameData;
             }
         }
-        throw new DataAccessException("Game with id " + gameId + "does not exist.");
+        throw new DataAccessException("Game not found");
     }
 
     public void updateGame(GameData gameData) throws DataAccessException {
