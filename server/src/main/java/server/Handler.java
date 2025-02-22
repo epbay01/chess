@@ -1,12 +1,26 @@
 package server;
 
 import com.google.gson.Gson;
+import org.eclipse.jetty.server.Authentication;
 import requestresult.*;
 import spark.*;
 import service.*;
 
 public class Handler {
-    public static Object handleRegister(Request req, Response res) { return res.body(); }
+    public static Object handleRegister(Request req, Response res) {
+        UserService userService = new UserService();
+        res.type("application/json");
+        Gson gson = new Gson();
+
+        RegisterRequest regReq = gson.fromJson(req.body(), RegisterRequest.class);
+        Result result = userService.register(regReq);
+
+        errorCheck(result, res);
+
+        res.body(Result.toJson(result));
+        return res.body();
+    }
+
     public static Object handleLogin(Request req, Response res) { return res.body(); }
     public static Object handleLogout(Request req, Response res) { return res.body(); }
     public static Object handleListGames(Request req, Response res) { return res.body(); }
@@ -15,26 +29,33 @@ public class Handler {
 
     public static Object handleClear(Request req, Response res) {
         GameService gameService = new GameService();
-        Gson gson = new Gson();
         res.type("application/json");
 
         Result result = gameService.clear();
-        System.out.println(gson.toJson(result));
+        System.out.println(Result.toJson(result));
 
+        errorCheck(result, res);
+
+        System.out.println(Result.toJson(result));
+
+        res.body(Result.toJson(result));
+        return res.body();
+    }
+
+    private static void errorCheck(Result result, Response response) {
         if (result instanceof ErrorResult) {
             switch (((ErrorResult) result).getMessage()) {
                 case "Not authenticated":
-                    res.status(401);
+                    response.status(401);
+                    break;
                 default:
-                    res.status(400);
+                    /* 400 error messages:
+                        "Username already exists"
+                     */
+                    response.status(400);
             }
         } else {
-            res.status(200);
+            response.status(200);
         }
-
-        System.out.println(gson.toJson(result));
-
-        res.body(gson.toJson(result));
-        return res.body();
     }
 }
