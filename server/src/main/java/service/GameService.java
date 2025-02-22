@@ -1,26 +1,38 @@
 package service;
 
+import dataaccess.AuthDao;
+import dataaccess.GameDao;
+import dataaccess.UserDao;
 import requestresult.*;
 import server.Server;
 
 public class GameService {
-    public Result listGames(AuthenticatedRequest req) {
-        return null;
+    private static GameDao gameDao;
+    private static UserDao userDao;
+    private static AuthDao authDao;
+
+    public GameService() {
+        gameDao = Server.gameDao;
+        userDao = Server.userDao;
+        authDao = Server.authDao;
+    }
+    public static Result listGames(AuthenticatedRequest req) {
+        return new ErrorResult("Not implemented");
     }
 
-    public Result joinGame(JoinGameRequest req) {
-        return null;
+    public static Result joinGame(JoinGameRequest req) {
+        return new ErrorResult("Not implemented");
     }
 
-    public Result createGame(CreateGameRequest req) {
-        return null;
+    public static Result createGame(CreateGameRequest req) {
+        return new ErrorResult("Not implemented");
     }
 
-    public Result clear() {
+    public static Result clear() {
         try {
-            Server.authDao.clear();
-            Server.gameDao.clear();
-            Server.userDao.clear();
+            authDao.clear();
+            gameDao.clear();
+            userDao.clear();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new ErrorResult(e.getMessage());

@@ -3,13 +3,9 @@ package server;
 import com.google.gson.Gson;
 import java.lang.String;
 
-import model.AuthData;
 import requestresult.*;
 import spark.*;
 import service.*;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 public class Handler {
     @FunctionalInterface
@@ -30,22 +26,35 @@ public class Handler {
     }
 
     public static Object handleLogout(Request req, Response res) {
-        AuthenticatedRequest logoutReq = new Gson().fromJson(req.body(), AuthenticatedRequest.class);
+        AuthenticatedRequest logoutReq = new AuthenticatedRequest(req.headers("Authorization"));
         return handle(UserService::logout, logoutReq, res);
     }
     public static Object handleListGames(Request req, Response res) {
-        AuthenticatedRequest listReq = new Gson().fromJson(req.body(), AuthenticatedRequest.class);
+        AuthenticatedRequest listReq = new AuthenticatedRequest(req.headers("Authorization"));
         return handle(GameService::listGames, listReq, res);
     }
-    public static Object handleCreateGame(Request req, Response res) { return res.body(); }
-    public static Object handleJoinGame(Request req, Response res) { return res.body(); }
+    public static Object handleCreateGame(Request req, Response res) {
+        CreateGameRequest createReq = new CreateGameRequest(
+                req.headers("Authorization"),
+                new Gson().fromJson(req.body(), String.class)
+        );
+        return handle(GameService::createGame, createReq, res);
+    }
+    public static Object handleJoinGame(Request req, Response res) {
+        JoinGameRequest temp = new Gson().fromJson(req.body(), JoinGameRequest.class);
+        JoinGameRequest joinReq = new JoinGameRequest(
+                req.headers("Authorization"),
+                temp.gameId(),
+                temp.playerColor()
+        );
+        return handle(GameService::joinGame, joinReq, res);
+    }
 
     // generic static handle doesn't work because clear() doesn't fit the functional interface (it has no parameters)
     public static Object handleClear(Request req, Response res) {
-        GameService gameService = new GameService();
         res.type("application/json");
 
-        Result result = gameService.clear();
+        Result result = GameService.clear();
 
         errorCheck(result, res);
 
@@ -58,6 +67,7 @@ public class Handler {
 
         errorCheck(result, res);
 
+        // Result.toJson ignores the authToken field
         res.body(Result.toJson(result));
         res.type("application/json");
         return res.body();
@@ -74,10 +84,13 @@ public class Handler {
                 case "Token not found", "Username not found", "Game not found":
                     response.status(404);
                     break;
+                case "Not implemented":
+                    response.status(501);
                 default:
                     /* 400 error messages:
                         "Username already exists"
                         "Already logged in"
+                        any other uncaught error with its default message
                      */
                     response.status(400);
             }
