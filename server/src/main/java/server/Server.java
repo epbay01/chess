@@ -6,15 +6,9 @@ import dataaccess.MemoryUserDao;
 import spark.*;
 
 public class Server {
-    public static MemoryAuthDao authDao;
-    public static MemoryUserDao userDao;
-    public static MemoryGameDao gameDao;
-
-    public Server() {
-        authDao = new MemoryAuthDao();
-        userDao = new MemoryUserDao();
-        gameDao = new MemoryGameDao();
-    }
+    public static MemoryAuthDao authDao = new MemoryAuthDao();
+    public static MemoryUserDao userDao = new MemoryUserDao();
+    public static MemoryGameDao gameDao = new MemoryGameDao();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);

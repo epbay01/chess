@@ -8,13 +8,8 @@ import server.Server;
 import java.util.UUID;
 
 public class UserService {
-    private static UserDao userDao;
-    private static AuthDao authDao;
-
-    public UserService() {
-        userDao = Server.userDao;
-        authDao = Server.authDao;
-    }
+    private static UserDao userDao = Server.userDao;
+    private static AuthDao authDao = Server.authDao;
 
     public static Result login(LoginRequest req) {
         AuthData newData;
@@ -60,7 +55,14 @@ public class UserService {
         if (!authenticate(req.authToken())) {
             return new ErrorResult("Not authenticated");
         }
-        return null;
+
+        try {
+            AuthData data = authDao.getAuthByToken(req.authToken());
+            authDao.deleteAuth(data.username());
+        } catch (DataAccessException e) {
+            return new ErrorResult(e.getMessage());
+        }
+        return new EmptyResult();
     }
 
     public static boolean authenticate(String authToken) {

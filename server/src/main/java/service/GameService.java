@@ -7,15 +7,10 @@ import requestresult.*;
 import server.Server;
 
 public class GameService {
-    private static GameDao gameDao;
-    private static UserDao userDao;
-    private static AuthDao authDao;
+    private static GameDao gameDao = Server.gameDao;
+    private static UserDao userDao = Server.userDao;
+    private static AuthDao authDao = Server.authDao;
 
-    public GameService() {
-        gameDao = Server.gameDao;
-        userDao = Server.userDao;
-        authDao = Server.authDao;
-    }
     public static Result listGames(AuthenticatedRequest req) {
         return new ErrorResult("Not implemented");
     }
