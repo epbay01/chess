@@ -67,7 +67,6 @@ public class Handler {
 
         errorCheck(result, res);
 
-        // Result.toJson ignores the authToken field
         res.body(Result.toJson(result));
         res.type("application/json");
         return res.body();
@@ -75,7 +74,7 @@ public class Handler {
 
     private static void errorCheck(Result result, Response response) {
         if (result instanceof ErrorResult) {
-            String str = ((ErrorResult) result).getMessage();
+            String str = ((ErrorResult) result).getMessage().substring(7);
 
             switch (str) {
                 case "Not authenticated":
@@ -86,13 +85,12 @@ public class Handler {
                     break;
                 case "Not implemented":
                     response.status(501);
+                    break;
+                case "Username already exists":
+                    response.status(403);
+                    break;
                 default:
-                    /* 400 error messages:
-                        "Username already exists"
-                        "Already logged in"
-                        any other uncaught error with its default message
-                     */
-                    response.status(400);
+                    response.status(500);
             }
         } else {
             response.status(200);

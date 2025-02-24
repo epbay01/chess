@@ -43,8 +43,8 @@ public class MemoryAuthDao implements AuthDao {
     }
 
     @Override
-    public void deleteAuth(String username) throws DataAccessException {
-        if(!db.removeIf(authData -> authData.username().equals(username))) {
+    public void deleteAuth(String token) throws DataAccessException {
+        if(!db.removeIf(authData -> authData.authToken().equals(token))) {
             throw new DataAccessException("Username not found");
         }
     }

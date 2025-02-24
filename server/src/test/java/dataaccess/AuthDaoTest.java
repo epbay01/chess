@@ -61,7 +61,7 @@ public class AuthDaoTest {
     void testDeleteAuth() {
         dao.addAuth(authData);
         try {
-            dao.deleteAuth("username");
+            dao.deleteAuth(authData.authToken());
         } catch (Exception e) {
             Assertions.fail();
         }

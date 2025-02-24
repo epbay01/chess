@@ -3,6 +3,7 @@ package server;
 import dataaccess.MemoryAuthDao;
 import dataaccess.MemoryGameDao;
 import dataaccess.MemoryUserDao;
+import service.GameService;
 import spark.*;
 
 public class Server {
@@ -30,6 +31,7 @@ public class Server {
     }
 
     public void stop() {
+        GameService.clear();
         Spark.stop();
         Spark.awaitStop();
     }

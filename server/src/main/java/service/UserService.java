@@ -14,22 +14,16 @@ public class UserService {
     public static Result login(LoginRequest req) {
         AuthData newData;
 
-        // verify not already logged in
-        try {
-            authDao.getAuth(req.username());
-            return new ErrorResult("Already logged in");
-        } catch (DataAccessException ignored) {}
-
         try {
             UserData user = userDao.getUser(req.username());
             if (user.password().equals(req.password())) {
                 newData = new AuthData(UUID.randomUUID().toString(), req.username());
                 authDao.addAuth(newData);
             } else {
-                return new ErrorResult("Not authenticated");
+                return new ErrorResult("Error: Not authenticated");
             }
         } catch (DataAccessException e) {
-            return new ErrorResult(e.getMessage());
+            return new ErrorResult("Error: " + e.getMessage());
         }
         return new LoginResult(newData.authToken(), req.username());
     }
@@ -38,7 +32,7 @@ public class UserService {
 
         try {
             userDao.getUser(req.username());
-            return new ErrorResult("Username already exists");
+            return new ErrorResult("Error: Username already exists");
         } catch (DataAccessException ignored) {}
 
         UserData data = new UserData(req.username(), req.password(), req.email());
@@ -53,14 +47,14 @@ public class UserService {
 
     public static Result logout(AuthenticatedRequest req) {
         if (!authenticate(req.authToken())) {
-            return new ErrorResult("Not authenticated");
+            return new ErrorResult("Error: Not authenticated");
         }
 
         try {
             AuthData data = authDao.getAuthByToken(req.authToken());
             authDao.deleteAuth(data.username());
         } catch (DataAccessException e) {
-            return new ErrorResult(e.getMessage());
+            return new ErrorResult("Error: " + e.getMessage());
         }
         return new EmptyResult();
     }

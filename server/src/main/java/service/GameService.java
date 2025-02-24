@@ -12,15 +12,15 @@ public class GameService {
     private static AuthDao authDao = Server.authDao;
 
     public static Result listGames(AuthenticatedRequest req) {
-        return new ErrorResult("Not implemented");
+        return new ErrorResult("Error: Not implemented");
     }
 
     public static Result joinGame(JoinGameRequest req) {
-        return new ErrorResult("Not implemented");
+        return new ErrorResult("Error: Not implemented");
     }
 
     public static Result createGame(CreateGameRequest req) {
-        return new ErrorResult("Not implemented");
+        return new ErrorResult("Error: Not implemented");
     }
 
     public static Result clear() {
@@ -30,7 +30,7 @@ public class GameService {
             userDao.clear();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new ErrorResult(e.getMessage());
+            return new ErrorResult("Error: " + e.getMessage());
         }
         System.out.println("Server memory DAOs cleared");
         return new EmptyResult();
