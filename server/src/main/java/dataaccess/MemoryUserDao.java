@@ -28,7 +28,7 @@ public class MemoryUserDao implements UserDao {
                 return user;
             }
         }
-        throw new DataAccessException("User " + username + " does not exist");
+        throw new DataAccessException("User does not exist");
     }
 
     @Override

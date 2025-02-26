@@ -5,6 +5,7 @@ import model.UserData;
 import requestresult.*;
 import server.Server;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
@@ -30,6 +31,13 @@ public class UserService {
 
     public static Result register(RegisterRequest req) {
 
+        if (Objects.equals(req.username(), "") ||
+                Objects.equals(req.password(), "") ||
+                req.username() == null ||
+                req.password() == null) {
+            return new ErrorResult("Error: Username or password is invalid");
+        }
+
         try {
             userDao.getUser(req.username());
             return new ErrorResult("Error: Username already exists");
@@ -52,7 +60,7 @@ public class UserService {
 
         try {
             AuthData data = authDao.getAuthByToken(req.authToken());
-            authDao.deleteAuth(data.username());
+            authDao.deleteAuth(data.authToken());
         } catch (DataAccessException e) {
             return new ErrorResult("Error: " + e.getMessage());
         }

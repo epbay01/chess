@@ -26,11 +26,11 @@ public class Handler {
     }
 
     public static Object handleLogout(Request req, Response res) {
-        AuthenticatedRequest logoutReq = new AuthenticatedRequest(req.headers("Authorization"));
+        AuthenticatedRequest logoutReq = new AuthenticatedRequest(req.headers("authorization"));
         return handle(UserService::logout, logoutReq, res);
     }
     public static Object handleListGames(Request req, Response res) {
-        AuthenticatedRequest listReq = new AuthenticatedRequest(req.headers("Authorization"));
+        AuthenticatedRequest listReq = new AuthenticatedRequest(req.headers("authorization"));
         return handle(GameService::listGames, listReq, res);
     }
     public static Object handleCreateGame(Request req, Response res) {
@@ -77,10 +77,13 @@ public class Handler {
             String str = ((ErrorResult) result).getMessage().substring(7);
 
             switch (str) {
-                case "Not authenticated":
+                case "Username or password is invalid":
+                    response.status(400);
+                    break;
+                case "Not authenticated", "User does not exist", "Token not found":
                     response.status(401);
                     break;
-                case "Token not found", "Username not found", "Game not found":
+                case "Username not found", "Game not found":
                     response.status(404);
                     break;
                 case "Not implemented":
