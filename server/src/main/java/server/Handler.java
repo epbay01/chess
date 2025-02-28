@@ -34,17 +34,19 @@ public class Handler {
         return handle(GameService::listGames, listReq, res);
     }
     public static Object handleCreateGame(Request req, Response res) {
+        CreateGameRequest temp = new Gson().fromJson(req.body(), CreateGameRequest.class);
         CreateGameRequest createReq = new CreateGameRequest(
-                req.headers("Authorization"),
-                new Gson().fromJson(req.body(), String.class)
+                req.headers("authorization"),
+                temp.gameName()
         );
+        System.out.println(createReq);
         return handle(GameService::createGame, createReq, res);
     }
     public static Object handleJoinGame(Request req, Response res) {
         JoinGameRequest temp = new Gson().fromJson(req.body(), JoinGameRequest.class);
         JoinGameRequest joinReq = new JoinGameRequest(
-                req.headers("Authorization"),
-                temp.gameId(),
+                req.headers("authorization"),
+                temp.gameID(),
                 temp.playerColor()
         );
         return handle(GameService::joinGame, joinReq, res);
@@ -67,7 +69,8 @@ public class Handler {
 
         errorCheck(result, res);
 
-        res.body(Result.toJson(result));
+        String str = Result.toJson(result);
+        res.body(str);
         res.type("application/json");
         return res.body();
     }
@@ -77,20 +80,20 @@ public class Handler {
             String str = ((ErrorResult) result).getMessage().substring(7);
 
             switch (str) {
-                case "Username or password is invalid":
+                case "Username or password is invalid", "Bad color", "Cannot parse null string":
                     response.status(400);
                     break;
                 case "Not authenticated", "User does not exist", "Token not found":
                     response.status(401);
+                    break;
+                case "Username already exists", "Color taken":
+                    response.status(403);
                     break;
                 case "Username not found", "Game not found":
                     response.status(404);
                     break;
                 case "Not implemented":
                     response.status(501);
-                    break;
-                case "Username already exists":
-                    response.status(403);
                     break;
                 default:
                     response.status(500);

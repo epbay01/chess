@@ -5,8 +5,8 @@ import model.*;
 public interface GameDao {
     void createGame(GameData gameData);
     GameData[] listGames();
-    GameData getGame(int gameId) throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
     void updateGame(GameData gameData) throws DataAccessException;
-    void deleteGame(int gameId) throws DataAccessException;
+    void deleteGame(int gameID) throws DataAccessException;
     void clear();
 }

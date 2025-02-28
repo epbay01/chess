@@ -1,9 +1,9 @@
 package requestresult;
 
 public class CreateGameResult extends Result {
-    String gameId;
+    int gameID;
 
-    public CreateGameResult(String gameId) {
-        this.gameId = gameId;
+    public CreateGameResult(int gameID) {
+        this.gameID = gameID;
     }
 }

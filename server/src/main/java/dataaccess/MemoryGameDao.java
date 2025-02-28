@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MemoryGameDao implements GameDao {
+    public static int id = 0;
     ArrayList<GameData> db;
 
     public MemoryGameDao() {
@@ -16,6 +17,8 @@ public class MemoryGameDao implements GameDao {
         this.db = db;
     }
 
+    public static void increment() { id++; }
+
     public void createGame(GameData gameData) {
         db.add(gameData);
     }
@@ -25,9 +28,9 @@ public class MemoryGameDao implements GameDao {
         return db.toArray(result);
     }
 
-    public GameData getGame(int gameId) throws DataAccessException {
+    public GameData getGame(int gameID) throws DataAccessException {
         for (GameData gameData : db) {
-            if (gameData.gameID() == gameId) {
+            if (gameData.gameID() == gameID) {
                 return gameData;
             }
         }
@@ -47,10 +50,10 @@ public class MemoryGameDao implements GameDao {
         db.add(ind, gameData);
     }
 
-    public void deleteGame(int gameId) throws DataAccessException {
+    public void deleteGame(int gameID) throws DataAccessException {
         GameData gameData;
         try {
-            gameData = getGame(gameId);
+            gameData = getGame(gameID);
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
