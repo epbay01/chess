@@ -15,5 +15,7 @@
     <orderEntry type="library" exported="" name="google.code.gson" level="project" />
     <orderEntry type="library" exported="" name="sparkjava.spark.core" level="project" />
     <orderEntry type="library" exported="" name="slf4j.simple" level="project" />
+    <orderEntry type="library" exported="" name="mysql.connector.java" level="project" />
+    <orderEntry type="library" exported="" name="mindrot.jbcrypt" level="project" />
   </component>
 </module>

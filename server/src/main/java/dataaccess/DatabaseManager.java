@@ -36,9 +36,50 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
+    public static void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
+            var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    /**
+     * Defines schema and creates the tables
+     * @throws DataAccessException
+     */
+    public static void createTables() throws DataAccessException {
+        try {
+            var statement = """
+                    CREATE TABLE IF NOT EXISTS user (
+                    	username VARCHAR(255) NOT NULL,
+                    	password INTEGER NOT NULL,
+                    	email VARCHAR(255),
+                        PRIMARY KEY(username)
+                    );
+                    
+                    CREATE TABLE IF NOT EXISTS auth (
+                    	token VARCHAR(255) NOT NULL,
+                        username VARCHAR(255) NOT NULL,
+                        PRIMARY KEY(token),
+                        FOREIGN KEY(username) REFERENCES user(username)
+                    );
+                    
+                    CREATE TABLE IF NOT EXISTS game (
+                    	gameID INTEGER auto_increment NOT NULL,
+                        whiteUsername VARCHAR(255) NULL,
+                        blackUsername VARCHAR(255) NULL,
+                        gameName VARCHAR(255),
+                        chessGame VARCHAR(512),
+                        PRIMARY KEY(gameID),
+                        FOREIGN KEY(whiteUsername) REFERENCES user(username),
+                        FOREIGN KEY(blackUsername) REFERENCES user(username)
+                    );
+                    """;
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
@@ -60,7 +101,7 @@ public class DatabaseManager {
      * }
      * </code>
      */
-    static Connection getConnection() throws DataAccessException {
+    public static Connection getConnection() throws DataAccessException {
         try {
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             conn.setCatalog(DATABASE_NAME);

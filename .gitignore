@@ -5,9 +5,10 @@ target
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.idea
 
 ### Mac OS ###
 .DS_Store
 
 ### Chess project ###
-server/**/db.properties
+**/db.properties
