@@ -1,6 +1,7 @@
 package dataaccess;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -54,35 +55,39 @@ public class DatabaseManager {
      */
     public static void createTables() throws DataAccessException {
         try {
-            var statement = """
-                    CREATE TABLE IF NOT EXISTS user (
-                    	username VARCHAR(255) NOT NULL,
-                    	password INTEGER NOT NULL,
-                    	email VARCHAR(255),
-                        PRIMARY KEY(username)
-                    );
-                    
-                    CREATE TABLE IF NOT EXISTS auth (
-                    	token VARCHAR(255) NOT NULL,
-                        username VARCHAR(255) NOT NULL,
-                        PRIMARY KEY(token),
-                        FOREIGN KEY(username) REFERENCES user(username)
-                    );
-                    
-                    CREATE TABLE IF NOT EXISTS game (
-                    	gameID INTEGER auto_increment NOT NULL,
-                        whiteUsername VARCHAR(255) NULL,
-                        blackUsername VARCHAR(255) NULL,
-                        gameName VARCHAR(255),
-                        chessGame VARCHAR(512),
-                        PRIMARY KEY(gameID),
-                        FOREIGN KEY(whiteUsername) REFERENCES user(username),
-                        FOREIGN KEY(blackUsername) REFERENCES user(username)
-                    );
-                    """;
-            var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+            String[] statements = {"""
+                CREATE TABLE IF NOT EXISTS user (
+                    `username` VARCHAR(255) NOT NULL,
+                    `password` INT NOT NULL,
+                    `email` VARCHAR(255),
+                    PRIMARY KEY(username)
+                );
+                """, """
+                CREATE TABLE IF NOT EXISTS auth (
+                    `token` VARCHAR(255) NOT NULL,
+                    `username` VARCHAR(255) NOT NULL,
+                    PRIMARY KEY(token),
+                    FOREIGN KEY(username) REFERENCES user(username)
+                );
+                """, """
+                CREATE TABLE IF NOT EXISTS game (
+                    `gameID` INT auto_increment NOT NULL,
+                    `whiteUsername` VARCHAR(255) NULL,
+                    `blackUsername` VARCHAR(255) NULL,
+                    `gameName` VARCHAR(255),
+                    `chessGame` VARCHAR(512),
+                    PRIMARY KEY(gameID),
+                    FOREIGN KEY(whiteUsername) REFERENCES user(username),
+                    FOREIGN KEY(blackUsername) REFERENCES user(username)
+                );
+                """};
+
+            for (var s : statements) {
+                try (var conn = DatabaseManager.getConnection()) {
+                    var preparedStatement = conn.prepareStatement(s);
+                    preparedStatement.executeUpdate();
+                    preparedStatement.close();
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
