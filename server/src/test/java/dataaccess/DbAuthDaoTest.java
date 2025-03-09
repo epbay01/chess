@@ -28,16 +28,22 @@ public class DbAuthDaoTest {
             System.err.println("During setup: " + e.getMessage());
         }
 
-        dao = new DbAuthDao();
-        authData = new AuthData("1234", "user");
-        dao.clear();
+        try {
+            dao = new DbAuthDao();
+            authData = new AuthData("1234", "user");
+            dao.clear();
+        } catch (Exception e) {
+            System.err.println("During setup: " + e.getMessage());
+        }
     }
 
     @Test
     void clearTest() {
-        dao.clear();
-
         try (Connection conn = DatabaseManager.getConnection()) {
+            conn.prepareStatement("INSERT INTO auth VALUES ('1234', 'user');").executeUpdate();
+
+            dao.clear();
+
             ResultSet resultSet = conn.prepareStatement("SELECT * FROM auth").executeQuery();
             Assertions.assertFalse(resultSet.next());
         } catch (Exception e) {

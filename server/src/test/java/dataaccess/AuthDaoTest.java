@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 public class AuthDaoTest {
-    private AuthDao dao;
+    private MemoryAuthDao dao;
     private AuthData authData;
 
     @BeforeEach

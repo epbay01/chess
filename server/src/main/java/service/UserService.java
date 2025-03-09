@@ -16,6 +16,7 @@ public class UserService {
         AuthData newData;
 
         try {
+            // TODO: CHANGE THIS PASSWORD COMPARISON!!!
             UserData user = userDao.getUser(req.username());
             if (user.password().equals(req.password())) {
                 newData = new AuthData(UUID.randomUUID().toString(), req.username());
@@ -47,8 +48,10 @@ public class UserService {
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, req.username());
 
-        userDao.createUser(data);
-        authDao.addAuth(authData);
+        try { // TODO: change later
+            userDao.createUser(data);
+            authDao.addAuth(authData);
+        } catch (DataAccessException ignored) {}
 
         return new LoginResult(authToken, req.username());
     }

@@ -42,12 +42,11 @@ public class DbAuthDao implements AuthDao{
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            conn.prepareStatement("drop table auth").executeUpdate();
-            DatabaseManager.createTables();
+            conn.prepareStatement("DELETE FROM auth").executeUpdate();
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            throw new DataAccessException(e.getMessage());
         }
     }
 }

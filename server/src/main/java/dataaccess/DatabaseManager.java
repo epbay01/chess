@@ -68,6 +68,8 @@ public class DatabaseManager {
                     `username` VARCHAR(255) NOT NULL,
                     PRIMARY KEY(token),
                     FOREIGN KEY(username) REFERENCES user(username)
+                        ON DELETE CASCADE
+                        ON UPDATE NO ACTION
                 );
                 """, """
                 CREATE TABLE IF NOT EXISTS game (
@@ -77,8 +79,12 @@ public class DatabaseManager {
                     `gameName` VARCHAR(255),
                     `chessGame` VARCHAR(512),
                     PRIMARY KEY(gameID),
-                    FOREIGN KEY(whiteUsername) REFERENCES user(username),
+                    FOREIGN KEY(whiteUsername) REFERENCES user(username)
+                        ON DELETE SET NULL
+                        ON UPDATE NO ACTION,
                     FOREIGN KEY(blackUsername) REFERENCES user(username)
+                        ON DELETE SET NULL
+                        ON UPDATE NO ACTION
                 );
                 """};
 
