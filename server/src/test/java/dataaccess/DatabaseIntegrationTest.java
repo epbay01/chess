@@ -4,15 +4,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 import server.Server;
 
-import java.sql.SQLException;
-
 /**
- * Tests for DataManager integration, and more basic functionality, NOT the db dao.
+ * Tests for DataManager integration, and more basic functionality, NOT the db DAO.
  * initTest - tests everything works and useMemory is set properly
  * sqlDatabaseTest - tests db exists and can be connected to
- * sqlTableTest - tests tables all exist and have primary keys
+ * sqlTableTest - tests tables all exist and have primary keys (they throw sql errors if not)
  */
 public class DatabaseIntegrationTest {
     public Server server;
