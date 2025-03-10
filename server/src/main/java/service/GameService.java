@@ -62,7 +62,10 @@ public class GameService {
         int gameID = MemoryGameDao.id;
 
         GameData data = new GameData(gameID, null, null, req.gameName(), new ChessGame());
-        gameDao.createGame(data);
+
+        try { // TODO: fix this
+            gameDao.createGame(data);
+        } catch (Exception ignored) { return null; }
 
         return new CreateGameResult(gameID);
     }

@@ -77,7 +77,7 @@ public class DatabaseManager {
                     `whiteUsername` VARCHAR(255) NULL,
                     `blackUsername` VARCHAR(255) NULL,
                     `gameName` VARCHAR(255),
-                    `chessGame` VARCHAR(512),
+                    `chessGame` VARCHAR(2200),
                     PRIMARY KEY(gameID),
                     FOREIGN KEY(whiteUsername) REFERENCES user(username)
                         ON DELETE SET NULL

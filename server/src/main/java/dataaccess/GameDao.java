@@ -3,7 +3,7 @@ package dataaccess;
 import model.*;
 
 public interface GameDao {
-    void createGame(GameData gameData);
+    void createGame(GameData gameData) throws DataAccessException;
     GameData[] listGames() throws DataAccessException;
     GameData getGame(int gameID) throws DataAccessException;
     void updateGame(GameData gameData) throws DataAccessException;
