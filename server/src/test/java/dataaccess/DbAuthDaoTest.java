@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import server.Server;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 public class DbAuthDaoTest {
     private Server server;
     private DbAuthDao dao;
+    private DbUserDao userDao;
     private AuthData authData;
 
     @BeforeEach
@@ -32,6 +34,12 @@ public class DbAuthDaoTest {
             dao = new DbAuthDao();
             authData = new AuthData("1234", "user");
             dao.clear();
+
+            userDao = new DbUserDao();
+            userDao.clear();
+            userDao.createUser(new UserData("user", "pass", "email"));
+            userDao.createUser(new UserData("user2", "pass2", "email2"));
+            // so foreign key constraints pass
         } catch (Exception e) {
             System.err.println("During setup: " + e.getMessage());
         }
@@ -68,6 +76,63 @@ public class DbAuthDaoTest {
         String expected = "1234,user\n4321,user2\n";
 
         Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    void addAuthTest() {
+        String result = "";
+        try {
+            dao.addAuth(authData);
+            result = dao.queryAll();
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        String expected = "1234,user\n";
+
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    void deleteAuthTest() {
+        String result = "";
+        try {
+            dao.addAuth(authData);
+            dao.deleteAuth(authData.authToken());
+            result = dao.queryAll();
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        String expected = "";
+
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    void getAuthTest() {
+        AuthData result = null;
+        try {
+            dao.addAuth(authData);
+            result = dao.getAuth("user");
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertEquals(authData, result);
+    }
+
+    @Test
+    void getAuthByTokenTest() {
+        AuthData result = null;
+        try {
+            dao.addAuth(authData);
+            result = dao.getAuthByToken("1234");
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertEquals(authData, result);
     }
 
     @AfterEach
