@@ -13,6 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
+import javax.xml.crypto.Data;
+
 public class DbGameDaoTest {
     private Server server;
     private DbUserDao userDao;
@@ -34,7 +36,7 @@ public class DbGameDaoTest {
             userDao.createUser(new UserData("user2", "pass2", "email2"));
 
             dao = new DbGameDao();
-            dao.clear();
+            dao.hardClear();
         } catch (Exception e) {
             System.err.println("In setup: " + e.getMessage());
         }
@@ -44,8 +46,8 @@ public class DbGameDaoTest {
     void clearTest() {
         // clear run in setup
         try (Connection conn = DatabaseManager.getConnection()) {
-            conn.prepareStatement("INSERT INTO games ('whiteUsername', 'blackUsername', 'gameName', 'chessGame') VALUES ('user', 'user2', 'game', "
-                    + (new ChessGame().toString()) + ")").executeUpdate();
+            conn.prepareStatement("INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame)"
+                    + " VALUES ('user', 'user2', 'game', '')").executeUpdate();
             dao.clear();
             ResultSet resultSet = conn.prepareStatement("SELECT * FROM game").executeQuery();
             Assertions.assertFalse(resultSet.next());
@@ -59,7 +61,6 @@ public class DbGameDaoTest {
         GameData[] results = new GameData[0];
         Gson gson = new Gson();
         try (Connection conn = DatabaseManager.getConnection()) {
-            System.out.print(gson.toJson(new ChessGame()));
             conn.prepareStatement("INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) " +
                     "VALUES ('user', 'user2', 'game', '" + (gson.toJson(new ChessGame())) + "')").executeUpdate();
             results = dao.listGames();
@@ -69,7 +70,6 @@ public class DbGameDaoTest {
 
         GameData[] expected = {gameData};
 
-        // currently the id auto-increments so this may fail
         Assertions.assertArrayEquals(expected, results);
     }
 
@@ -82,6 +82,49 @@ public class DbGameDaoTest {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Test
+    void getGameTest() {
+        GameData result = null;
+        try {
+            dao.createGame(gameData);
+            result = dao.getGame(1);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertEquals(gameData, result);
+    }
+
+    @Test
+    void updateGameTest() {
+        GameData result = null;
+        try {
+            dao.createGame(new GameData(
+                    1,"user","user","", new ChessGame())
+            );
+            dao.updateGame(gameData);
+            result = dao.getGame(1);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertEquals(gameData, result);
+    }
+
+    @Test
+    void deleteGameTest() {
+        GameData[] result = null;
+        try {
+            dao.createGame(gameData);
+            dao.deleteGame(1);
+            result = dao.listGames();
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertArrayEquals(new GameData[]{}, result);
     }
 
     @AfterEach
