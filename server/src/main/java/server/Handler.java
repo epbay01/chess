@@ -13,6 +13,14 @@ public class Handler {
         Result process(T req);
     }
 
+    /*
+    TODO:
+        1. try/catch for all dao usage
+        2. modify error throws to conform to switch
+        3. write negative dao tests
+        4. integration test
+    */
+
     public static Object handleRegister(Request req, Response res) {
         Gson gson = new Gson();
         RegisterRequest regReq = gson.fromJson(req.body(), RegisterRequest.class);

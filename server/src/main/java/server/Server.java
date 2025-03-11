@@ -5,10 +5,10 @@ import service.GameService;
 import spark.*;
 
 public class Server {
-    public static MemoryAuthDao authDao = new MemoryAuthDao();
-    public static MemoryUserDao userDao = new MemoryUserDao();
-    public static MemoryGameDao gameDao = new MemoryGameDao();
-    public boolean useMemory;
+    public AuthDao authDao;
+    public UserDao userDao;
+    public GameDao gameDao;
+    public boolean useMemory = false;
 
     public Server() { this.useMemory = false; }
 
@@ -20,9 +20,20 @@ public class Server {
         try {
             DatabaseManager.createDatabase();
             DatabaseManager.createTables();
+            useMemory = false;
         } catch (DataAccessException e) {
             System.out.println("Database or table creation failed with message:\n" + e.getMessage());
             useMemory = true;
+        }
+
+        if (!useMemory) {
+            authDao = new DbAuthDao();
+            userDao = new DbUserDao();
+            gameDao = new DbGameDao();
+        } else {
+            authDao = new MemoryAuthDao();
+            userDao = new MemoryUserDao();
+            gameDao = new MemoryGameDao();
         }
 
         Spark.post("/user", Handler::handleRegister);

@@ -13,11 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
-import javax.xml.crypto.Data;
-
 public class DbGameDaoTest {
     private Server server;
-    private DbUserDao userDao;
     private DbGameDao dao;
     private GameData gameData;
 
@@ -30,7 +27,7 @@ public class DbGameDaoTest {
         );
 
         try {
-            userDao = new DbUserDao();
+            DbUserDao userDao = new DbUserDao();
             userDao.clear();
             userDao.createUser(new UserData("user", "pass", "email"));
             userDao.createUser(new UserData("user2", "pass2", "email2"));

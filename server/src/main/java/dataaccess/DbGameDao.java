@@ -28,7 +28,6 @@ public class DbGameDao implements GameDao {
     @Override
     public GameData[] listGames() throws DataAccessException {
         ArrayList<GameData> games = new ArrayList<>();
-        Gson gson = new Gson();
         int count = 0;
         try (Connection conn = DatabaseManager.getConnection()) {
             ResultSet resultSet = conn.prepareStatement("SELECT * FROM game").executeQuery();
@@ -48,7 +47,7 @@ public class DbGameDao implements GameDao {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        GameData game = null;
+        GameData game;
         try (Connection conn = DatabaseManager.getConnection()) {
             ResultSet resultSet = conn.prepareStatement("SELECT * FROM game WHERE gameID=" + gameID)
                     .executeQuery();
