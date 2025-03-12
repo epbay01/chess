@@ -10,8 +10,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
-    private static final UserDao userDao = Server.userDao;
-    private static final AuthDao authDao = Server.authDao;
+    private static final UserDao USER_DAO = Server.userDao;
+    private static final AuthDao AUTH_DAO = Server.authDao;
 
     private static boolean comparePasswords(UserData userData, String password) {
         if (Server.useMemory) {
@@ -25,7 +25,7 @@ public class UserService {
         AuthData newData;
 
         try {
-            UserData user = userDao.getUser(req.username());
+            UserData user = USER_DAO.getUser(req.username());
             if (!comparePasswords(user, req.password())) {
                 return new ErrorResult("Error: Not authenticated");
             }
@@ -33,9 +33,9 @@ public class UserService {
             do {
                 newData = new AuthData(UUID.randomUUID().toString(), req.username());
                 try {
-                    authDao.getAuthByToken(newData.authToken());
+                    AUTH_DAO.getAuthByToken(newData.authToken());
                 } catch (DataAccessException e) {
-                    authDao.addAuth(newData);
+                    AUTH_DAO.addAuth(newData);
                     return new LoginResult(newData.authToken(), req.username());
                 }
             } while (true); // loops until successfully finds an unique token
@@ -54,7 +54,7 @@ public class UserService {
         }
 
         try {
-            userDao.getUser(req.username());
+            USER_DAO.getUser(req.username());
             return new ErrorResult("Error: Username already exists");
         } catch (DataAccessException ignored) {}
 
@@ -63,8 +63,8 @@ public class UserService {
         AuthData authData = new AuthData(authToken, req.username());
 
         try {
-            userDao.createUser(data);
-            authDao.addAuth(authData);
+            USER_DAO.createUser(data);
+            AUTH_DAO.addAuth(authData);
         } catch (DataAccessException e) {
             return new ErrorResult("Error: " + e.getMessage());
         }
@@ -78,8 +78,8 @@ public class UserService {
         }
 
         try {
-            AuthData data = authDao.getAuthByToken(req.authToken());
-            authDao.deleteAuth(data.authToken());
+            AuthData data = AUTH_DAO.getAuthByToken(req.authToken());
+            AUTH_DAO.deleteAuth(data.authToken());
         } catch (DataAccessException e) {
             return new ErrorResult("Error: " + e.getMessage());
         }
@@ -90,7 +90,7 @@ public class UserService {
         AuthData dbData;
 
         try {
-            dbData = authDao.getAuthByToken(authToken);
+            dbData = AUTH_DAO.getAuthByToken(authToken);
         } catch (Exception e) {
             return false;
         }

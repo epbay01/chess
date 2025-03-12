@@ -5,15 +5,14 @@ import dataaccess.*;
 import model.GameData;
 import requestresult.*;
 import server.Server;
-import service.UserService;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 public class GameService {
-    private static final GameDao gameDao = Server.gameDao;
-    private static final UserDao userDao = Server.userDao;
-    private static final AuthDao authDao = Server.authDao;
+    private static final GameDao GAME_DAO = Server.gameDao;
+    private static final UserDao USER_DAO = Server.userDao;
+    private static final AuthDao AUTH_DAO = Server.authDao;
 
     public static Result listGames(AuthenticatedRequest req) {
         if (!UserService.authenticate(req.authToken())) {
@@ -21,7 +20,7 @@ public class GameService {
         }
 
         try {
-            return new ListGamesResult(Arrays.asList(gameDao.listGames()));
+            return new ListGamesResult(Arrays.asList(GAME_DAO.listGames()));
         } catch (DataAccessException e) {
             return new ErrorResult("Error: " + e.getMessage());
         }
@@ -33,8 +32,8 @@ public class GameService {
         }
 
         try {
-            String username = authDao.getAuthByToken(req.authToken()).username();
-            GameData game = gameDao.getGame(Integer.parseInt(req.gameID()));
+            String username = AUTH_DAO.getAuthByToken(req.authToken()).username();
+            GameData game = GAME_DAO.getGame(Integer.parseInt(req.gameID()));
             GameData newData;
             if (Objects.equals(req.playerColor(), "WHITE")) {
                 if (!(game.whiteUsername() == null || game.whiteUsername().isEmpty())) {
@@ -49,7 +48,7 @@ public class GameService {
             } else {
                 return new ErrorResult("Error: Bad color");
             }
-            gameDao.updateGame(newData);
+            GAME_DAO.updateGame(newData);
             return new EmptyResult();
         } catch (Exception e) {
             return new ErrorResult("Error: " + e.getMessage());
@@ -71,14 +70,14 @@ public class GameService {
         GameData data = new GameData(gameID, null, null, req.gameName(), new ChessGame());
 
         try {
-            gameDao.createGame(data);
+            GAME_DAO.createGame(data);
         } catch (DataAccessException e) {
             return new ErrorResult("Error: " + e.getMessage());
         }
 
         if (!Server.useMemory) {
             try {
-                gameID = ((DbGameDao) gameDao).getGameID(data);
+                gameID = ((DbGameDao) GAME_DAO).getGameID(data);
             } catch (DataAccessException e) {
                 return new ErrorResult("Error: " + e.getMessage());
             }
@@ -89,9 +88,9 @@ public class GameService {
 
     public static Result clear() {
         try {
-            authDao.clear();
-            gameDao.clear();
-            userDao.clear();
+            AUTH_DAO.clear();
+            GAME_DAO.clear();
+            USER_DAO.clear();
         } catch (Exception e) {
             return new ErrorResult("Error: " + e.getMessage());
         }

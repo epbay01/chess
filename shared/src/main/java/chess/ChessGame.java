@@ -290,7 +290,9 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return whiteCheck == chessGame.whiteCheck && blackCheck == chessGame.blackCheck && Objects.equals(board, chessGame.board) && turn == chessGame.turn;
+        return whiteCheck == chessGame.whiteCheck &&
+                blackCheck == chessGame.blackCheck &&
+                Objects.equals(board, chessGame.board) && turn == chessGame.turn;
     }
 
     @Override
