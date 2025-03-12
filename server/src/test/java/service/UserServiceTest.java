@@ -9,8 +9,12 @@ import server.Server;
 public class UserServiceTest {
     @BeforeEach
     void init() {
-        Server.authDao.clear();
-        Server.userDao.clear();
+        try {
+            Server.authDao.clear();
+            Server.userDao.clear();
+        } catch (Exception e) {
+            Assertions.fail();
+        }
     }
 
     @Test

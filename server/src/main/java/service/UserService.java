@@ -2,6 +2,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import requestresult.*;
 import server.Server;
 
@@ -9,16 +10,23 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
-    private static UserDao userDao = Server.userDao;
-    private static AuthDao authDao = Server.authDao;
+    private static final UserDao userDao = Server.userDao;
+    private static final AuthDao authDao = Server.authDao;
+
+    private static boolean comparePasswords(UserData userData, String password) {
+        if (Server.useMemory) {
+            return Objects.equals(userData.password(), password);
+        } else {
+            return BCrypt.checkpw(password, userData.password());
+        }
+    }
 
     public static Result login(LoginRequest req) {
         AuthData newData;
 
         try {
-            // TODO: CHANGE THIS PASSWORD COMPARISON!!!
             UserData user = userDao.getUser(req.username());
-            if (user.password().equals(req.password())) {
+            if (comparePasswords(user, req.password())) {
                 newData = new AuthData(UUID.randomUUID().toString(), req.username());
                 authDao.addAuth(newData);
             } else {
@@ -48,10 +56,12 @@ public class UserService {
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, req.username());
 
-        try { // TODO: change later
+        try {
             userDao.createUser(data);
             authDao.addAuth(authData);
-        } catch (DataAccessException ignored) {}
+        } catch (DataAccessException e) {
+            return new ErrorResult("Error: " + e.getMessage());
+        }
 
         return new LoginResult(authToken, req.username());
     }

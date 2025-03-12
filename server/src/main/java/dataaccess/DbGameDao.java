@@ -11,15 +11,43 @@ import java.util.ArrayList;
 public class DbGameDao implements GameDao {
     @Override
     public void createGame(GameData gameData) throws DataAccessException {
+        String newWhiteUsername = (gameData.whiteUsername() != null) ?
+                gameData.whiteUsername().replaceAll("'", "''") : null;
+        String newBlackUsername = (gameData.blackUsername() != null) ?
+                gameData.blackUsername().replaceAll("'", "''") : null;
+        String newGameName = gameData.gameName().replaceAll("'", "''");
         Gson gson = new Gson();
         try (Connection conn = DatabaseManager.getConnection()) {
-            String str = "INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) VALUES ('" +
-                    gameData.whiteUsername() + "', '" +
-                    gameData.blackUsername() + "', '" +
-                    gameData.gameName() + "', '" +
+            String str = "INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) VALUES (" +
+                    ((newWhiteUsername != null) ? "'" + newWhiteUsername + "'" : "NULL") + ", " +
+                    ((newBlackUsername != null) ? "'" + newBlackUsername + "'" : "NULL") + ", '" +
+                    newGameName + "', '" +
                     gson.toJson(gameData.chessGame())
                     + "');";
             conn.prepareStatement(str).executeUpdate();
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public int getGameID(GameData gameData) throws DataAccessException {
+        String newWhiteUsername = (gameData.whiteUsername() != null) ?
+                gameData.whiteUsername().replaceAll("'", "''") : null;
+        String newBlackUsername = (gameData.blackUsername() != null) ?
+                gameData.blackUsername().replaceAll("'", "''") : null;
+        String newGameName = gameData.gameName().replaceAll("'", "''");
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String str = "SELECT * FROM game WHERE whiteUsername" +
+                    ((newWhiteUsername != null) ? "='" + newWhiteUsername + "'" : " IS NULL") +
+                    " AND blackUsername" +
+                    ((newBlackUsername != null) ? "='" + newBlackUsername + "'" : " IS NULL") +
+                    " AND gameName='" + newGameName + "'";
+            ResultSet resultSet = conn.prepareStatement(str).executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("gameID");
+            } else {
+                throw new DataAccessException("Game not found");
+            }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
@@ -60,14 +88,18 @@ public class DbGameDao implements GameDao {
 
     @Override
     public void updateGame(GameData gameData) throws DataAccessException {
+        String newWhiteUsername = (gameData.whiteUsername() != null) ?
+                gameData.whiteUsername().replaceAll("'", "''") : null;
+        String newBlackUsername = (gameData.blackUsername() != null) ?
+                gameData.blackUsername().replaceAll("'", "''") : null;
+        String newGameName = gameData.gameName().replaceAll("'", "''");
         Gson gson = new Gson();
         try (Connection conn = DatabaseManager.getConnection()) {
-            String str = "UPDATE game SET whiteUsername='"
-                    + gameData.whiteUsername() + "', blackUsername='"
-                    + gameData.blackUsername() + "', gameName='"
-                    + gameData.gameName() + "', chessGame='"
-                    + gson.toJson(gameData.chessGame())
-                    + "' WHERE gameID=" + gameData.gameID();
+            String str = "UPDATE game SET whiteUsername=" +
+                    ((newWhiteUsername != null) ? "'" + newWhiteUsername + "'" : "NULL") +
+                    ", blackUsername=" +
+                    ((newBlackUsername != null) ? "'" + newBlackUsername + "'" : "NULL") +
+                    ", gameName='" + newGameName + "' WHERE gameID=" + gameData.gameID();
             conn.prepareStatement(str).executeUpdate();
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());

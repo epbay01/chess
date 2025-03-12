@@ -11,18 +11,20 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class GameService {
-    private static GameDao gameDao = Server.gameDao;
-    private static UserDao userDao = Server.userDao;
-    private static AuthDao authDao = Server.authDao;
+    private static final GameDao gameDao = Server.gameDao;
+    private static final UserDao userDao = Server.userDao;
+    private static final AuthDao authDao = Server.authDao;
 
     public static Result listGames(AuthenticatedRequest req) {
         if (!UserService.authenticate(req.authToken())) {
             return new ErrorResult("Error: Not authenticated");
         }
 
-        try { // TODO: fix this
+        try {
             return new ListGamesResult(Arrays.asList(gameDao.listGames()));
-        } catch (Exception ignored) { return null; }
+        } catch (DataAccessException e) {
+            return new ErrorResult("Error: " + e.getMessage());
+        }
     }
 
     public static Result joinGame(JoinGameRequest req) {
@@ -58,14 +60,29 @@ public class GameService {
         if (!UserService.authenticate(req.authToken())) {
             return new ErrorResult("Error: Not authenticated");
         }
-        MemoryGameDao.increment();
-        int gameID = MemoryGameDao.id;
+
+        int gameID = 0; // will be thrown out in sql implementation
+
+        if (Server.useMemory) {
+            MemoryGameDao.increment();
+            gameID = MemoryGameDao.id;
+        }
 
         GameData data = new GameData(gameID, null, null, req.gameName(), new ChessGame());
 
-        try { // TODO: fix this
+        try {
             gameDao.createGame(data);
-        } catch (Exception ignored) { return null; }
+        } catch (DataAccessException e) {
+            return new ErrorResult("Error: " + e.getMessage());
+        }
+
+        if (!Server.useMemory) {
+            try {
+                gameID = ((DbGameDao) gameDao).getGameID(data);
+            } catch (DataAccessException e) {
+                return new ErrorResult("Error: " + e.getMessage());
+            }
+        }
 
         return new CreateGameResult(gameID);
     }
@@ -76,10 +93,8 @@ public class GameService {
             gameDao.clear();
             userDao.clear();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ErrorResult("Error: " + e.getMessage());
         }
-        System.out.println("Server memory DAOs cleared");
         return new EmptyResult();
     }
 }

@@ -56,6 +56,7 @@ public class DbUserDao implements UserDao {
         }
     }
 
+    // for testing
     public String queryAll() {
         StringBuilder query = new StringBuilder();
         try (Connection conn = DatabaseManager.getConnection()) {

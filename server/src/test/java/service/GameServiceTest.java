@@ -1,9 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.MemoryAuthDao;
-import dataaccess.MemoryGameDao;
-import dataaccess.MemoryUserDao;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -21,14 +19,21 @@ import java.util.List;
 public class GameServiceTest {
     @BeforeEach
     public void init() {
-        Server.authDao.clear();
-        Server.userDao.clear();
-        Server.gameDao.clear();
+        try {
+            Server.authDao.clear();
+            Server.userDao.clear();
+            Server.gameDao.clear();
+        } catch (Exception e) { Assertions.fail(); }
     }
 
     @Test
     public void listGamesTest() {
-        Server.authDao.addAuth(new AuthData("1234", "user"));
+        try {
+            Server.userDao.createUser(new UserData("user", "pass", "email"));
+            Server.authDao.addAuth(new AuthData("1234", "user"));
+        } catch (Exception e) {
+            Assertions.fail("createUser or addAuth failed");
+        }
         AuthenticatedRequest request = new AuthenticatedRequest("1234");
         Result result = GameService.listGames(request);
 
@@ -49,8 +54,13 @@ public class GameServiceTest {
 
     @Test
     public void joinGameTest() {
-        Server.authDao.addAuth(new AuthData("1234", "user"));
-        Server.gameDao.createGame(new GameData(1, null, null, "game", new ChessGame()));
+        try {
+            Server.userDao.createUser(new UserData("user", "pass", "email"));
+            Server.authDao.addAuth(new AuthData("1234", "user"));
+            Server.gameDao.createGame(new GameData(1, null, null, "game", new ChessGame()));
+        } catch (Exception e) {
+            Assertions.fail("createUser, addAuth or createGame failed with error: " + e.getMessage());
+        }
         JoinGameRequest request = new JoinGameRequest("1234", "1", "WHITE");
         Result result = GameService.joinGame(request);
 
@@ -71,7 +81,12 @@ public class GameServiceTest {
 
     @Test
     public void createGameTest() {
-        Server.authDao.addAuth(new AuthData("1234", "user"));
+        try {
+            Server.userDao.createUser(new UserData("user", "pass", "email"));
+            Server.authDao.addAuth(new AuthData("1234", "user"));
+        } catch (Exception e) {
+            Assertions.fail("createUser or addAuth failed with error: " + e.getMessage());
+        }
         CreateGameRequest request = new CreateGameRequest("1234", "game");
         Result result = GameService.createGame(request);
 
@@ -92,14 +107,28 @@ public class GameServiceTest {
 
     @Test
     public void clearTest() {
-        Server.authDao.addAuth(new AuthData("1234", "user"));
-        Server.userDao.createUser(new UserData("user", "pass", "email"));
-        Server.gameDao.createGame(new GameData(1,"user", null, "game", new ChessGame()));
+        try {
+            Server.userDao.createUser(new UserData("user", "pass", "email"));
+            Server.authDao.addAuth(new AuthData("1234", "user"));
+            Server.gameDao.createGame(new GameData(1, "user", null, "game", new ChessGame()));
+        } catch (Exception e) {
+            Assertions.fail("createUser, addAuth or createGame failed");
+        }
 
         GameService.clear();
 
-        Assertions.assertEquals(new MemoryAuthDao(), Server.authDao);
-        Assertions.assertEquals(new MemoryGameDao(), Server.gameDao);
-        Assertions.assertEquals(new MemoryUserDao(), Server.userDao);
+        if (Server.useMemory) {
+            Assertions.assertEquals(new MemoryAuthDao(), Server.authDao);
+            Assertions.assertEquals(new MemoryGameDao(), Server.gameDao);
+            Assertions.assertEquals(new MemoryUserDao(), Server.userDao);
+        } else {
+            try {
+                Assertions.assertArrayEquals(new GameData[]{}, Server.gameDao.listGames());
+                Assertions.assertEquals("", ((DbUserDao) Server.userDao).queryAll());
+                Assertions.assertEquals("", ((DbAuthDao) Server.authDao).queryAll());
+            } catch (Exception e) {
+                Assertions.fail();
+            }
+        }
     }
 }

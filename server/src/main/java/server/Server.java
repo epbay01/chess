@@ -5,24 +5,19 @@ import service.GameService;
 import spark.*;
 
 public class Server {
-    public AuthDao authDao;
-    public UserDao userDao;
-    public GameDao gameDao;
-    public boolean useMemory = false;
+    public static AuthDao authDao;
+    public static UserDao userDao;
+    public static GameDao gameDao;
+    public static boolean useMemory = false;
 
-    public Server() { this.useMemory = false; }
-
-    public int run(int desiredPort) {
-        Spark.port(desiredPort);
-
-        Spark.staticFiles.location("web");
-
+    static {
         try {
             DatabaseManager.createDatabase();
             DatabaseManager.createTables();
             useMemory = false;
         } catch (DataAccessException e) {
             System.out.println("Database or table creation failed with message:\n" + e.getMessage());
+            System.out.println("Using in-memory database");
             useMemory = true;
         }
 
@@ -35,6 +30,12 @@ public class Server {
             userDao = new MemoryUserDao();
             gameDao = new MemoryGameDao();
         }
+    }
+
+    public int run(int desiredPort) {
+        Spark.port(desiredPort);
+
+        Spark.staticFiles.location("web");
 
         Spark.post("/user", Handler::handleRegister);
         Spark.post("/session", Handler::handleLogin);
@@ -51,7 +52,6 @@ public class Server {
     }
 
     public void stop() {
-        GameService.clear();
         Spark.stop();
         Spark.awaitStop();
     }
