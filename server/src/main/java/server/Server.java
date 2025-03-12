@@ -8,13 +8,14 @@ public class Server {
     public static AuthDao authDao;
     public static UserDao userDao;
     public static GameDao gameDao;
-    public static boolean useMemory = false;
+    public static boolean useMemory;
 
     static {
         try {
             DatabaseManager.createDatabase();
             DatabaseManager.createTables();
             useMemory = false;
+            System.out.println("Database server started successfully");
         } catch (DataAccessException e) {
             System.out.println("Database or table creation failed with message:\n" + e.getMessage());
             System.out.println("Using in-memory database");
