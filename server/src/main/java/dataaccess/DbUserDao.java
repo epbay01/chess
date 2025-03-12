@@ -28,7 +28,7 @@ public class DbUserDao implements UserDao {
 
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement statement = conn.prepareStatement(
-                    "SELECT * FROM chess.`user` WHERE username='" + username + "'");
+                    "SELECT * FROM `user` WHERE username='" + username + "'");
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 user = new UserData(resultSet.getString("username"),

@@ -44,6 +44,9 @@ public class DatabaseManager {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
             }
+            try (var preparedStatement = conn.prepareStatement("USE " + DATABASE_NAME)) {
+                preparedStatement.executeUpdate();
+            }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
