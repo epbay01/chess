@@ -14,6 +14,7 @@ import model.UserData;
 import java.sql.Connection;
 import java.sql.ResultSet;
 
+
 public class DbUserDaoTest {
     Server server;
     DbUserDao dao;
@@ -89,6 +90,17 @@ public class DbUserDaoTest {
         Assertions.assertEquals(expected[0], allResults[0]);
         Assertions.assertTrue(BCrypt.checkpw(expected[1], allResults[1]));
         Assertions.assertEquals(expected[2], allResults[2]);
+    }
+
+    @Test
+    void addUserFailTest() {
+        try {
+            dao.createUser(userData);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertThrows(DataAccessException.class, () -> dao.createUser(userData));
     }
 
     @AfterEach

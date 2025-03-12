@@ -26,16 +26,22 @@ public class UserService {
 
         try {
             UserData user = userDao.getUser(req.username());
-            if (comparePasswords(user, req.password())) {
-                newData = new AuthData(UUID.randomUUID().toString(), req.username());
-                authDao.addAuth(newData);
-            } else {
+            if (!comparePasswords(user, req.password())) {
                 return new ErrorResult("Error: Not authenticated");
             }
+
+            do {
+                newData = new AuthData(UUID.randomUUID().toString(), req.username());
+                try {
+                    authDao.getAuthByToken(newData.authToken());
+                } catch (DataAccessException e) {
+                    authDao.addAuth(newData);
+                    return new LoginResult(newData.authToken(), req.username());
+                }
+            } while (true); // loops until successfully finds an unique token
         } catch (DataAccessException e) {
             return new ErrorResult("Error: " + e.getMessage());
         }
-        return new LoginResult(newData.authToken(), req.username());
     }
 
     public static Result register(RegisterRequest req) {

@@ -94,6 +94,12 @@ public class DbAuthDaoTest {
     }
 
     @Test
+    void addAuthFailTest() {
+        Assertions.assertThrows(DataAccessException.class,
+                () -> dao.addAuth(new AuthData(null, null)));
+    }
+
+    @Test
     void deleteAuthTest() {
         String result = "";
         try {
@@ -109,6 +115,8 @@ public class DbAuthDaoTest {
         Assertions.assertEquals(expected, result);
     }
 
+    // deleteAuth never fails
+
     @Test
     void getAuthTest() {
         AuthData result = null;
@@ -123,6 +131,11 @@ public class DbAuthDaoTest {
     }
 
     @Test
+    void getAuthFailTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> dao.getAuth("user"));
+    }
+
+    @Test
     void getAuthByTokenTest() {
         AuthData result = null;
         try {
@@ -133,6 +146,11 @@ public class DbAuthDaoTest {
         }
 
         Assertions.assertEquals(authData, result);
+    }
+
+    @Test
+    void getAuthByTokenFailTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> dao.getAuthByToken("1234"));
     }
 
     @AfterEach

@@ -15,6 +15,7 @@ public class DbGameDao implements GameDao {
                 gameData.whiteUsername().replaceAll("'", "''") : null;
         String newBlackUsername = (gameData.blackUsername() != null) ?
                 gameData.blackUsername().replaceAll("'", "''") : null;
+        if (gameData.gameName() == null) throw new DataAccessException("Cannot parse null string");
         String newGameName = gameData.gameName().replaceAll("'", "''");
         Gson gson = new Gson();
         try (Connection conn = DatabaseManager.getConnection()) {

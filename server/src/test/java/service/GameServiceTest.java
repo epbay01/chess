@@ -61,7 +61,17 @@ public class GameServiceTest {
         } catch (Exception e) {
             Assertions.fail("createUser, addAuth or createGame failed with error: " + e.getMessage());
         }
-        JoinGameRequest request = new JoinGameRequest("1234", "1", "WHITE");
+        int gameID = 1;
+        if (!Server.useMemory) {
+            try {
+                gameID = ((DbGameDao) Server.gameDao).getGameID(
+                        new GameData(1, null, null, "game", new ChessGame())
+                );
+            } catch (Exception e) {
+                Assertions.fail(e.getMessage());
+            }
+        }
+        JoinGameRequest request = new JoinGameRequest("1234", Integer.toString(gameID), "WHITE");
         Result result = GameService.joinGame(request);
 
         EmptyResult expected = new EmptyResult();
@@ -90,9 +100,7 @@ public class GameServiceTest {
         CreateGameRequest request = new CreateGameRequest("1234", "game");
         Result result = GameService.createGame(request);
 
-        var expected = new CreateGameResult(1);
-
-        Assertions.assertEquals(expected, result);
+        Assertions.assertEquals(CreateGameResult.class, result.getClass());
     }
 
     @Test

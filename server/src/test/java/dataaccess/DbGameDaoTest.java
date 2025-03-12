@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
+
 public class DbGameDaoTest {
     private Server server;
     private DbGameDao dao;
@@ -79,6 +80,13 @@ public class DbGameDaoTest {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Test
+    void createGameFailTest() {
+        Assertions.assertThrows(DataAccessException.class, () -> dao.createGame(
+                new GameData(1, null, null, null, null)
+        ));
     }
 
     @Test
