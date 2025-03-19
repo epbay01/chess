@@ -3,7 +3,6 @@ package service;
 import chess.ChessGame;
 import dataaccess.*;
 import model.GameData;
-import requestresult.*;
 import server.Server;
 
 import java.util.Arrays;

@@ -8,13 +8,9 @@ import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import requestresult.*;
 import server.Server;
-import service.GameService;
-import service.UserService;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GameServiceTest {
     @BeforeEach

@@ -3,7 +3,6 @@ package service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import requestresult.*;
 import server.Server;
 
 public class UserServiceTest {
