@@ -5,6 +5,7 @@ import java.lang.String;
 
 import spark.*;
 import service.*;
+import requestresult.*;
 
 public class Handler {
     @FunctionalInterface

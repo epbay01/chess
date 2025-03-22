@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
+import requestresult.*;
 import model.GameData;
 import server.Server;
 

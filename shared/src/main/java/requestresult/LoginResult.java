@@ -13,6 +13,8 @@ public class LoginResult extends Result {
 
     public String getAuthToken() { return authToken; }
 
+    public String getUsername() { return username; }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
