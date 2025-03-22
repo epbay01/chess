@@ -11,6 +11,8 @@ public class ListGamesResult extends Result {
         this.games = games;
     }
 
+    public List<GameData> getGames() { return games; }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

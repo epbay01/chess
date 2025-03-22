@@ -9,6 +9,8 @@ public class CreateGameResult extends Result {
         this.gameID = gameID;
     }
 
+    public int getGameID() { return gameID; }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
