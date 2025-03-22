@@ -161,24 +161,4 @@ public class ServerFacade {
             }
         }
     }
-
-//    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass)
-//    throws ResponseException {
-//        String serverUrl = getUrl(path);
-//        try {
-//            URL url = (new URI(serverUrl)).toURL();
-//            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-//            http.setRequestMethod(method);
-//            http.setDoOutput(true);
-//
-//            writeBody(request, http);
-//            http.connect();
-//            throwIfNotSuccessful(http);
-//            return readBody(http, responseClass);
-//        } catch (ResponseException ex) {
-//            throw ex;
-//        } catch (Exception ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
 }

@@ -2,14 +2,11 @@ package client;
 
 import chess.ChessGame;
 import exceptions.BadStatusCodeException;
-import exceptions.ServerException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
-import requestresult.RegisterRequest;
 import server.Server;
-import client.ServerFacade;
 
 import java.util.List;
 
@@ -18,7 +15,7 @@ public class ServerFacadeTests {
     private static Server server;
     private static ServerFacade facade;
     private static final int PORT = 8080;
-    private static final UserData userData = new UserData("user", "pass", "email");
+    private static final UserData USER_DATA = new UserData("user", "pass", "email");
 
     @BeforeAll
     public static void init() {
@@ -48,9 +45,9 @@ public class ServerFacadeTests {
     public void registerTest() {
         try {
             facade.clear();
-            var result = facade.register(userData);
+            var result = facade.register(USER_DATA);
             Assertions.assertNotNull(result);
-            Assertions.assertEquals(userData.username(), result.username());
+            Assertions.assertEquals(USER_DATA.username(), result.username());
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
@@ -60,8 +57,8 @@ public class ServerFacadeTests {
     @Test
     public void registerUserExists() {
         facade.clear();
-        facade.register(userData);
-        Assertions.assertThrows(BadStatusCodeException.class, () -> facade.register(userData));
+        facade.register(USER_DATA);
+        Assertions.assertThrows(BadStatusCodeException.class, () -> facade.register(USER_DATA));
     }
 
     @Order(3)
@@ -69,8 +66,8 @@ public class ServerFacadeTests {
     public void loginTest() {
         try {
             facade.clear();
-            facade.register(userData);
-            var result = facade.login(userData);
+            facade.register(USER_DATA);
+            var result = facade.login(USER_DATA);
             Assertions.assertNotNull(result);
             Assertions.assertEquals(AuthData.class, result.getClass());
         } catch (Exception e) {
@@ -83,7 +80,7 @@ public class ServerFacadeTests {
     public void loginWrongPasswordTest() {
         try {
             facade.clear();
-            var auth = facade.register(userData);
+            var auth = facade.register(USER_DATA);
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
@@ -97,7 +94,7 @@ public class ServerFacadeTests {
     public void logoutTest() {
         try {
             facade.clear();
-            var authData = facade.register(userData);
+            var authData = facade.register(USER_DATA);
             facade.logout(authData);
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
@@ -118,7 +115,7 @@ public class ServerFacadeTests {
     public void createGameTest() {
         try {
             facade.clear();
-            var auth = facade.register(userData);
+            var auth = facade.register(USER_DATA);
             var id = facade.createGame(auth, "Game");
             Assertions.assertTrue(true, "Game id is: " + id);
         } catch (Exception e) {
@@ -144,7 +141,7 @@ public class ServerFacadeTests {
 
         try {
             facade.clear();
-            var auth = facade.register(userData);
+            var auth = facade.register(USER_DATA);
             id1 = facade.createGame(auth, "Game");
             id2 = facade.createGame(auth, "Game 2");
             result = facade.listGames(auth);
@@ -177,7 +174,7 @@ public class ServerFacadeTests {
 
         try {
             facade.clear();
-            var auth = facade.register(userData);
+            var auth = facade.register(USER_DATA);
             id = facade.createGame(auth, "Game");
             before = facade.listGames(auth).toArray(new GameData[1]);
             facade.joinGame(auth, id, ChessGame.TeamColor.WHITE);
@@ -187,7 +184,7 @@ public class ServerFacadeTests {
         }
 
         Assertions.assertNull(before[0].whiteUsername());
-        Assertions.assertEquals(after[0].whiteUsername(), userData.username());
+        Assertions.assertEquals(after[0].whiteUsername(), USER_DATA.username());
     }
 
     @Order(4)
@@ -195,7 +192,7 @@ public class ServerFacadeTests {
     public void joinNonexistentGameTest() {
         try {
             facade.clear();
-            var auth = facade.register(userData);
+            var auth = facade.register(USER_DATA);
             Assertions.assertThrows(BadStatusCodeException.class, () -> facade.joinGame(auth, 1, ChessGame.TeamColor.WHITE));
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
