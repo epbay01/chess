@@ -1,6 +1,8 @@
 package client;
 
 import chess.ChessGame;
+import exceptions.BadStatusCodeException;
+import exceptions.ServerException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -54,6 +56,14 @@ public class ServerFacadeTests {
         }
     }
 
+    @Order(2)
+    @Test
+    public void registerUserExists() {
+        facade.clear();
+        facade.register(userData);
+        Assertions.assertThrows(BadStatusCodeException.class, () -> facade.register(userData));
+    }
+
     @Order(3)
     @Test
     public void loginTest() {
@@ -70,6 +80,20 @@ public class ServerFacadeTests {
 
     @Order(3)
     @Test
+    public void loginWrongPasswordTest() {
+        try {
+            facade.clear();
+            var auth = facade.register(userData);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+        Assertions.assertThrows(BadStatusCodeException.class, () -> facade.login(
+                new UserData("user", "badPass", "email")
+        ));
+    }
+
+    @Order(3)
+    @Test
     public void logoutTest() {
         try {
             facade.clear();
@@ -78,6 +102,15 @@ public class ServerFacadeTests {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Order(3)
+    @Test
+    public void logoutNotLoggedInTest() {
+        facade.clear();
+        Assertions.assertThrows(BadStatusCodeException.class, () -> facade.logout(
+                new AuthData("faketoken", "user")
+        ));
     }
 
     @Order(3)
@@ -91,6 +124,15 @@ public class ServerFacadeTests {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Order(3)
+    @Test
+    public void createGameUnauthorizedTest() {
+        Assertions.assertThrows(BadStatusCodeException.class, () -> facade.createGame(
+                new AuthData("faketoken", "user"),
+                "Game"
+        ));
     }
 
     @Order(3)
@@ -118,6 +160,14 @@ public class ServerFacadeTests {
         Assertions.assertArrayEquals(expected, result.toArray());
     }
 
+    @Order(3)
+    @Test
+    public void listGamesUnauthorizedTest() {
+        Assertions.assertThrows(BadStatusCodeException.class, () -> facade.listGames(
+                new AuthData("faketoken", "user")
+        ));
+    }
+
     @Order(4)
     @Test
     public void joinGameTest() {
@@ -138,5 +188,18 @@ public class ServerFacadeTests {
 
         Assertions.assertNull(before[0].whiteUsername());
         Assertions.assertEquals(after[0].whiteUsername(), userData.username());
+    }
+
+    @Order(4)
+    @Test
+    public void joinNonexistentGameTest() {
+        try {
+            facade.clear();
+            var auth = facade.register(userData);
+            Assertions.assertThrows(BadStatusCodeException.class, () -> facade.joinGame(auth, 1, ChessGame.TeamColor.WHITE));
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+
     }
 }

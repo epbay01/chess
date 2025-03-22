@@ -43,7 +43,7 @@ public class ServerFacade {
         try {
             Result r = makeRequest("/user", "POST", registerRequest, LoginResult.class);
             return new AuthData(((LoginResult) r).getAuthToken(), ((LoginResult) r).getUsername());
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ServerException(e.getMessage());
         }
     }
@@ -53,7 +53,7 @@ public class ServerFacade {
         try {
             Result r = makeRequest("/session", "POST", loginRequest, LoginResult.class);
             return new AuthData(((LoginResult) r).getAuthToken(), ((LoginResult) r).getUsername());
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ServerException(e.getMessage());
         }
     }
@@ -117,18 +117,19 @@ public class ServerFacade {
     private <T, V extends Result> Result makeRequest (
             String endpoint, String method, T request, Class<V> responseClass
     ) throws BadStatusCodeException, IOException {
+        HttpURLConnection http;
         try {
             URL url = new URI(getUrl(endpoint)).toURL();
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
             if (request instanceof AuthenticatedRequest) {
-                http.setRequestProperty("authorization", ((AuthenticatedRequest)request).authToken());
+                http.setRequestProperty("authorization", ((AuthenticatedRequest) request).authToken());
             } else if (request instanceof CreateGameRequest) {
-                http.setRequestProperty("authorization", ((CreateGameRequest)request).authToken());
+                http.setRequestProperty("authorization", ((CreateGameRequest) request).authToken());
             } else if (request instanceof JoinGameRequest) {
-                http.setRequestProperty("authorization", ((JoinGameRequest)request).authToken());
+                http.setRequestProperty("authorization", ((JoinGameRequest) request).authToken());
             }
 
             if (method.equals("POST") || method.equals("PUT")) {
@@ -139,26 +140,25 @@ public class ServerFacade {
             }
 
             http.connect();
-            int statusCode = http.getResponseCode();
-            if (statusCode / 100 != 2) {
-                throw new BadStatusCodeException(statusCode, http.getResponseMessage());
-            }
+        } catch (Exception e) {
+            throw new ServerException(e.getMessage());
+        }
 
+        int statusCode = http.getResponseCode();
+        if (statusCode / 100 != 2) {
+            throw new BadStatusCodeException(statusCode, http.getResponseMessage());
+        }
+
+        try (InputStream body = http.getInputStream()) {
+            Reader reader = new InputStreamReader(body);
+            return new Gson().fromJson(reader, responseClass);
+        } catch (Exception e) {
             try (InputStream body = http.getInputStream()) {
                 Reader reader = new InputStreamReader(body);
-                return new Gson().fromJson(reader, responseClass);
-            } catch (Exception e) {
-                try (InputStream body = http.getInputStream()) {
-                    Reader reader = new InputStreamReader(body);
-                    return new Gson().fromJson(reader, ErrorResult.class);
-                } catch (Exception f) {
-                    throw new ServerException(f.getMessage());
-                }
+                return new Gson().fromJson(reader, ErrorResult.class);
+            } catch (Exception f) {
+                throw new ServerException(f.getMessage());
             }
-
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            return new ErrorResult(e.getMessage());
         }
     }
 
