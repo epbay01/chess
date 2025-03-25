@@ -263,8 +263,9 @@ public class Repl {
 
     private void create(String name) {
         int id = serverFacade.createGame(authData, name);
+        idMap.put(idMap.size() + 1, id);
         System.out.println("Successfully created game " + name + " with id "
-                + EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_YELLOW + id);
+                + EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_YELLOW + idMap.size());
     }
 
     private void join(String id) {
