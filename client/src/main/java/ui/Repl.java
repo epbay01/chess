@@ -304,26 +304,44 @@ public class Repl {
     }
 
     private void printBoard(ChessBoard board, ChessGame.TeamColor color) {
-        boolean currentlyWhite = (color == ChessGame.TeamColor.WHITE);
-        System.out.print(RESET_ALL);
+        System.out.print(RESET_ALL + EscapeSequences.ERASE_SCREEN);
 
+        System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_BOLD
+            + EscapeSequences.SET_TEXT_COLOR_WHITE);
+        System.out.print(EscapeSequences.EMPTY);
+        char column = 'a';
+        for (int k = 0; k < 8; k++) {
+            if (color == ChessGame.TeamColor.WHITE) {
+                column = (char) ('a' + k);
+            } else {
+                column = (char) ('a' + (7 - k));
+            }
+            System.out.print(" " + column + " ");
+        }
+        System.out.print(RESET_ALL + "\n");
+
+        boolean currentlyWhite = true;
         for(int i = 0; i < 8; i++) {
+            int x = i + 1;
+            if (color == ChessGame.TeamColor.BLACK) {
+                x = 8 - i;
+            }
+
+            System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_BOLD
+                + EscapeSequences.SET_TEXT_COLOR_WHITE);
+            System.out.print(" " + x + " ");
+
             for (int j = 0; j < 8; j++) {
-                int x = i + 1;
+                System.out.print(RESET_ALL);
                 int y = j + 1;
                 if (color == ChessGame.TeamColor.BLACK) {
-                    x = 8 - i;
                     y = 8 - j;
                 }
 
                 if (currentlyWhite) {
-                    System.out.print(
-                            EscapeSequences.SET_BG_COLOR_LIGHT_GREY + getChessPiece(board, x, y, color)
-                    );
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + getChessPiece(board, x, y, color));
                 } else {
-                    System.out.print(
-                            EscapeSequences.SET_BG_COLOR_DARK_GREY + getChessPiece(board, x, y, color)
-                    );
+                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + getChessPiece(board, x, y, color));
                 }
 
                 if (j != 7) {
