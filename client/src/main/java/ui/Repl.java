@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Repl {
-    private final ServerFacade SERVER;
+    private final ServerFacade serverFacade;
     private AuthData authData;
     private boolean loggedIn;
     private static final String RESET_ALL = EscapeSequences.RESET_TEXT_COLOR
@@ -24,7 +24,7 @@ public class Repl {
             + EscapeSequences.RESET_TEXT_UNDERLINE;
 
     public Repl(ServerFacade server) {
-        this.SERVER = server;
+        this.serverFacade = server;
         this.authData = null;
         this.loggedIn = false;
     }
@@ -137,7 +137,7 @@ public class Repl {
 
         var user = new UserData(username, password, email);
         try {
-            authData = (newUser) ? SERVER.register(user) : SERVER.login(user);
+            authData = (newUser) ? serverFacade.register(user) : serverFacade.login(user);
             return true;
         } catch (Exception e) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: " + e.getMessage());
@@ -213,7 +213,7 @@ public class Repl {
     private boolean logout() {
         System.out.print(RESET_ALL);
         try {
-            SERVER.logout(authData);
+            serverFacade.logout(authData);
             authData = null;
             System.out.println(EscapeSequences.RESET_TEXT_ITALIC + "Successfully logged out.");
             return true;
@@ -226,7 +226,7 @@ public class Repl {
     private void list() {
         System.out.print(RESET_ALL);
         System.out.print(EscapeSequences.ERASE_SCREEN);
-        List<GameData> games = SERVER.listGames(authData);
+        List<GameData> games = serverFacade.listGames(authData);
         final String empty = EscapeSequences.SET_TEXT_UNDERLINE + EscapeSequences.SET_TEXT_ITALIC
                 + EscapeSequences.SET_TEXT_BOLD + "empty" + EscapeSequences.RESET_TEXT_ITALIC
                 + EscapeSequences.RESET_TEXT_UNDERLINE + EscapeSequences.RESET_TEXT_BOLD_FAINT;
@@ -250,7 +250,7 @@ public class Repl {
     }
 
     private void create(String name) {
-        int id = SERVER.createGame(authData, name);
+        int id = serverFacade.createGame(authData, name);
         System.out.println("Successfully created game " + name + " with id "
                 + EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_YELLOW + id);
     }
@@ -275,7 +275,7 @@ public class Repl {
         }
 
         try {
-            SERVER.joinGame(authData, Integer.parseInt(id), color);
+            serverFacade.joinGame(authData, Integer.parseInt(id), color);
             System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Successfully joined game!");
             game(color);
         } catch (Exception e) {
