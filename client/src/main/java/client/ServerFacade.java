@@ -16,6 +16,10 @@ import java.util.List;
 public class ServerFacade {
     private final int port;
 
+    public ServerFacade() {
+        this.port = 8080;
+    }
+
     public ServerFacade(int port) {
         this.port = port;
     }
@@ -118,9 +122,43 @@ public class ServerFacade {
             String endpoint, String method, T request, Class<V> responseClass
     ) throws BadStatusCodeException, IOException {
         HttpURLConnection http;
+
+        try {
+            http = prepRequest(endpoint, method, request);
+            http.connect();
+        } catch (Exception e) {
+            throw new ServerException(e.getMessage());
+        }
+
+        int statusCode = http.getResponseCode();
+        if (statusCode / 100 != 2) {
+            String errorMsg;
+            try (InputStream body = http.getInputStream()) {
+                Reader reader = new InputStreamReader(body);
+                errorMsg = (new Gson().fromJson(reader, ErrorResult.class)).getMessage();
+            } catch (Exception e) {
+                throw new BadStatusCodeException(statusCode, http.getResponseMessage());
+            }
+            throw new BadStatusCodeException(statusCode, http.getResponseMessage() + ", " + errorMsg);
+        }
+
+        try (InputStream body = http.getInputStream()) {
+            Reader reader = new InputStreamReader(body);
+            return new Gson().fromJson(reader, responseClass);
+        } catch (Exception e) {
+            try (InputStream body = http.getInputStream()) {
+                Reader reader = new InputStreamReader(body);
+                return new Gson().fromJson(reader, ErrorResult.class);
+            } catch (Exception f) {
+                throw new ServerException(f.getMessage());
+            }
+        }
+    }
+
+    private <T> HttpURLConnection prepRequest(String endpoint, String method, T request) throws ServerException {
         try {
             URL url = new URI(getUrl(endpoint)).toURL();
-            http = (HttpURLConnection) url.openConnection();
+            var http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
@@ -139,26 +177,9 @@ public class ServerFacade {
                 }
             }
 
-            http.connect();
+            return http;
         } catch (Exception e) {
             throw new ServerException(e.getMessage());
-        }
-
-        int statusCode = http.getResponseCode();
-        if (statusCode / 100 != 2) {
-            throw new BadStatusCodeException(statusCode, http.getResponseMessage());
-        }
-
-        try (InputStream body = http.getInputStream()) {
-            Reader reader = new InputStreamReader(body);
-            return new Gson().fromJson(reader, responseClass);
-        } catch (Exception e) {
-            try (InputStream body = http.getInputStream()) {
-                Reader reader = new InputStreamReader(body);
-                return new Gson().fromJson(reader, ErrorResult.class);
-            } catch (Exception f) {
-                throw new ServerException(f.getMessage());
-            }
         }
     }
 }
