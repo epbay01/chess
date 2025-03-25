@@ -9,15 +9,14 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Repl {
-    private ServerFacade server;
+    private final ServerFacade SERVER;
     private AuthData authData;
     private boolean loggedIn;
-    private final String RESET_ALL = EscapeSequences.RESET_TEXT_COLOR
+    private static final String RESET_ALL = EscapeSequences.RESET_TEXT_COLOR
             + EscapeSequences.RESET_TEXT_ITALIC
             + EscapeSequences.RESET_TEXT_BOLD_FAINT
             + EscapeSequences.RESET_BG_COLOR
@@ -25,7 +24,7 @@ public class Repl {
             + EscapeSequences.RESET_TEXT_UNDERLINE;
 
     public Repl(ServerFacade server) {
-        this.server = server;
+        this.SERVER = server;
         this.authData = null;
         this.loggedIn = false;
     }
@@ -138,7 +137,7 @@ public class Repl {
 
         var user = new UserData(username, password, email);
         try {
-            authData = (newUser) ? server.register(user) : server.login(user);
+            authData = (newUser) ? SERVER.register(user) : SERVER.login(user);
             return true;
         } catch (Exception e) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: " + e.getMessage());
@@ -214,7 +213,7 @@ public class Repl {
     private boolean logout() {
         System.out.print(RESET_ALL);
         try {
-            server.logout(authData);
+            SERVER.logout(authData);
             authData = null;
             System.out.println(EscapeSequences.RESET_TEXT_ITALIC + "Successfully logged out.");
             return true;
@@ -227,7 +226,7 @@ public class Repl {
     private void list() {
         System.out.print(RESET_ALL);
         System.out.print(EscapeSequences.ERASE_SCREEN);
-        List<GameData> games = server.listGames(authData);
+        List<GameData> games = SERVER.listGames(authData);
         final String empty = EscapeSequences.SET_TEXT_UNDERLINE + EscapeSequences.SET_TEXT_ITALIC
                 + EscapeSequences.SET_TEXT_BOLD + "empty" + EscapeSequences.RESET_TEXT_ITALIC
                 + EscapeSequences.RESET_TEXT_UNDERLINE + EscapeSequences.RESET_TEXT_BOLD_FAINT;
@@ -251,7 +250,7 @@ public class Repl {
     }
 
     private void create(String name) {
-        int id = server.createGame(authData, name);
+        int id = SERVER.createGame(authData, name);
         System.out.println("Successfully created game " + name + " with id "
                 + EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_YELLOW + id);
     }
@@ -276,7 +275,7 @@ public class Repl {
         }
 
         try {
-            server.joinGame(authData, Integer.parseInt(id), color);
+            SERVER.joinGame(authData, Integer.parseInt(id), color);
             System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Successfully joined game!");
             game(color);
         } catch (Exception e) {
@@ -300,6 +299,8 @@ public class Repl {
 
         printBoard(board, color);
 
+        // here will implement gameplay/call gameplay class
+
         waitForQ();
     }
 
@@ -309,7 +310,7 @@ public class Repl {
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_BOLD
             + EscapeSequences.SET_TEXT_COLOR_WHITE);
         System.out.print(EscapeSequences.EMPTY);
-        char column = 'a';
+        char column;
         for (int k = 0; k < 8; k++) {
             if (color == ChessGame.TeamColor.WHITE) {
                 column = (char) ('a' + k);
@@ -339,9 +340,9 @@ public class Repl {
                 }
 
                 if (currentlyWhite) {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + getChessPiece(board, x, y, color));
+                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + getChessPiece(board, x, y));
                 } else {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + getChessPiece(board, x, y, color));
+                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + getChessPiece(board, x, y));
                 }
 
                 if (j != 7) {
@@ -352,7 +353,7 @@ public class Repl {
         }
     }
 
-    private String getChessPiece(ChessBoard board, int x, int y, ChessGame.TeamColor color) {
+    private String getChessPiece(ChessBoard board, int x, int y) {
         ChessPiece piece = board.getPiece(new ChessPosition(x, y));
         if (piece == null) {
             return EscapeSequences.EMPTY;
