@@ -15,7 +15,6 @@ public class ServerFacadeTests {
 
     private static Server server;
     private static ServerFacade facade;
-    //private static final int PORT = 8080;
     private static final UserData USER_DATA = new UserData("user", "pass", "email");
 
     @BeforeAll
