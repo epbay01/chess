@@ -1,6 +1,9 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import client.ServerFacade;
 import model.AuthData;
 import model.GameData;
@@ -275,7 +278,7 @@ public class Repl {
         try {
             server.joinGame(authData, Integer.parseInt(id), color);
             System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Successfully joined game!");
-            game();
+            game(color);
         } catch (Exception e) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: " + e.getMessage());
         }
@@ -288,6 +291,69 @@ public class Repl {
 
     private void invalid() {
         System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. Type \"help\" or \"h\" for help.");
+    }
+
+
+    private void game(ChessGame.TeamColor color) {
+        ChessGame game = new ChessGame(); // temporary
+        ChessBoard board = game.getBoard();
+
+        printBoard(board, color);
+
+        waitForQ();
+    }
+
+    private void printBoard(ChessBoard board, ChessGame.TeamColor color) {
+        boolean currentlyWhite = (color == ChessGame.TeamColor.WHITE);
+        System.out.print(RESET_ALL);
+
+        for(int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                int x = i + 1;
+                int y = j + 1;
+                if (color == ChessGame.TeamColor.BLACK) {
+                    x = 8 - i;
+                    y = 8 - j;
+                }
+
+                if (currentlyWhite) {
+                    System.out.print(
+                            EscapeSequences.SET_BG_COLOR_LIGHT_GREY + getChessPiece(board, x, y, color)
+                    );
+                } else {
+                    System.out.print(
+                            EscapeSequences.SET_BG_COLOR_DARK_GREY + getChessPiece(board, x, y, color)
+                    );
+                }
+
+                if (j != 7) {
+                    currentlyWhite = !currentlyWhite;
+                }
+            }
+            System.out.print(RESET_ALL + "\n");
+        }
+    }
+
+    private String getChessPiece(ChessBoard board, int x, int y, ChessGame.TeamColor color) {
+        ChessPiece piece = board.getPiece(new ChessPosition(x, y));
+        if (piece == null) {
+            return EscapeSequences.EMPTY;
+        }
+
+        return switch (piece.getPieceType()) {
+            case KNIGHT -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ?
+                    EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT;
+            case KING -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ?
+                    EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING;
+            case ROOK -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ?
+                    EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK;
+            case BISHOP -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ?
+                    EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP;
+            case QUEEN -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ?
+                    EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN;
+            case PAWN -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ?
+                    EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN;
+        };
     }
 
 
@@ -310,9 +376,5 @@ public class Repl {
                 loop = false;
             }
         }
-    }
-
-    private void game() {
-        waitForQ();
     }
 }
