@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import client.ServerFacade;
 import model.AuthData;
 import model.GameData;
@@ -111,18 +112,11 @@ public class Repl {
                 + RESET_ALL + "Observes the given game."
         );
         System.out.println(
-                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "create, cg: "
+                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "create, cg [game name]: "
                 + RESET_ALL + "Creates a new game, does not join it."
         );
 
-        System.out.println("Enter q to quit.");
-        Scanner scanner = new Scanner(System.in);
-        boolean loop = true;
-        while (loop) {
-            if (scanner.next().equals("q")) {
-                loop = false;
-            }
-        }
+        waitForQ();
     }
 
     private boolean login(boolean newUser) {
@@ -186,7 +180,15 @@ public class Repl {
                 join(inp[1]);
                 break;
             case "create", "cg":
-                create();
+                if (inp.length < 2) {
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED
+                            + "Error: Didn't input correct arguments.");
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_TEXT_ITALIC
+                            + "Correct usage:"
+                            + RESET_ALL + " create [game name] | cg [game name]");
+                    break;
+                }
+                create(inp[1]);
                 break;
             case "observe", "o":
                 if (inp.length < 2) {
@@ -242,6 +244,64 @@ public class Repl {
                     + RESET_ALL
             );
         }
+        waitForQ();
+    }
+
+    private void create(String name) {
+        int id = server.createGame(authData, name);
+        System.out.println("Successfully created game " + name + " with id "
+                + EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_YELLOW + id);
+    }
+
+    private void join(String id) {
+        Scanner scanner = new Scanner(System.in);
+        boolean loop = true;
+        ChessGame.TeamColor color = null;
+
+        while (loop) {
+            System.out.print(RESET_ALL + "Enter w/white or b/black: ");
+            String inp = scanner.nextLine();
+            if (inp.equals("b") || inp.equals("black")) {
+                color = ChessGame.TeamColor.BLACK;
+                loop = false;
+            } else if (inp.equals("w") || inp.equals("white")) {
+                color = ChessGame.TeamColor.WHITE;
+                loop = false;
+            } else {
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input, enter w, white, b, or black.");
+            }
+        }
+
+        try {
+            server.joinGame(authData, Integer.parseInt(id), color);
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Successfully joined game!");
+            game();
+        } catch (Exception e) {
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: " + e.getMessage());
+        }
+    }
+
+    private void observe(String id) {
+        System.out.println("Observing game " + id);
+        // functionality requires websocket
+    }
+
+    private void invalid() {
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. Type \"help\" or \"h\" for help.");
+    }
+
+
+    private String[] getInput(String user) {
+        System.out.print(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + "chess"
+                + RESET_ALL + " | "
+                + EscapeSequences.SET_TEXT_COLOR_GREEN + user
+                + RESET_ALL + " >> ");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+        return line.split(" ");
+    }
+
+    private void waitForQ() {
         System.out.println("Enter q to quit.");
         Scanner scanner = new Scanner(System.in);
         boolean loop = true;
@@ -252,21 +312,7 @@ public class Repl {
         }
     }
 
-    private void create() {}
-    private void join(String id) {}
-    private void observe(String id) {}
-
-    private void invalid() {
-        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. Type \"help\" or \"h\" for help.");
-    }
-
-    private String[] getInput(String user) {
-        System.out.print(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + "chess"
-                + RESET_ALL + " | "
-                + EscapeSequences.SET_TEXT_COLOR_GREEN + user
-                + RESET_ALL + " >> ");
-        Scanner scanner = new Scanner(System.in);
-        String line = scanner.nextLine();
-        return line.split(" ");
+    private void game() {
+        waitForQ();
     }
 }
