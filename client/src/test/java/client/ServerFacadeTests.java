@@ -2,6 +2,7 @@ package client;
 
 import chess.ChessGame;
 import exceptions.BadStatusCodeException;
+import exceptions.ServerException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -14,14 +15,14 @@ public class ServerFacadeTests {
 
     private static Server server;
     private static ServerFacade facade;
-    private static final int PORT = 8080;
+    //private static final int PORT = 8080;
     private static final UserData USER_DATA = new UserData("user", "pass", "email");
 
     @BeforeAll
     public static void init() {
         server = new Server();
-        facade = new ServerFacade(PORT);
-        var port = server.run(PORT);
+        var port = server.run(0);
+        facade = new ServerFacade(port);
         System.out.println("Started test HTTP server on " + port);
     }
 
@@ -38,6 +39,14 @@ public class ServerFacadeTests {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Order(1)
+    @Test
+    public void clearFailTest() {
+        stopServer();
+        Assertions.assertThrows(ServerException.class, () -> facade.clear());
+        init();
     }
 
     @Order(2)
