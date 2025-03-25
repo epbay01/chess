@@ -163,13 +163,13 @@ public class Repl {
         var inp = getInput(authData.username());
         switch (inp[0]) {
             case "quit", "q":
-                loggedIn = logout();
+                loggedIn = !logout();
                 return false;
             case "help", "h":
                 help();
                 break;
             case "logout", "l":
-                loggedIn = logout();
+                loggedIn = !logout();
                 break;
             case "list", "lg":
                 list();
@@ -223,18 +223,20 @@ public class Repl {
         System.out.print(RESET_ALL);
         System.out.print(EscapeSequences.ERASE_SCREEN);
         List<GameData> games = server.listGames(authData);
+        final String empty = EscapeSequences.SET_TEXT_UNDERLINE + EscapeSequences.SET_TEXT_ITALIC
+                + EscapeSequences.SET_TEXT_BOLD + "empty" + EscapeSequences.RESET_TEXT_ITALIC
+                + EscapeSequences.RESET_TEXT_UNDERLINE + EscapeSequences.RESET_TEXT_BOLD_FAINT;
+
         for (GameData game : games) {
-            String white = (game.whiteUsername() != null ? game.whiteUsername()
-                    : EscapeSequences.SET_TEXT_UNDERLINE + EscapeSequences.SET_TEXT_ITALIC + "empty"
-                      + EscapeSequences.RESET_TEXT_ITALIC + EscapeSequences.RESET_TEXT_UNDERLINE);
-            String black = (game.blackUsername() != null ? game.blackUsername()
-                    : EscapeSequences.SET_TEXT_UNDERLINE + EscapeSequences.SET_TEXT_ITALIC + "empty"
-                      + EscapeSequences.RESET_TEXT_ITALIC + EscapeSequences.RESET_TEXT_UNDERLINE);
+            String white = (game.whiteUsername() != null ? game.whiteUsername() : empty);
+            String black = (game.blackUsername() != null ? game.blackUsername() : empty);
+
+
             System.out.println(
-                    EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_YELLOW + game.gameID() + ": "
-                    + RESET_ALL
-                    + EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_TEXT_UNDERLINE + game.gameName() + " "
-                    + RESET_ALL + EscapeSequences.SET_BG_COLOR_LIGHT_GREY
+                    EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_YELLOW + game.gameID() + ":"
+                    + RESET_ALL + " "
+                    + EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_TEXT_UNDERLINE + game.gameName()
+                    + RESET_ALL + " " + EscapeSequences.SET_BG_COLOR_LIGHT_GREY
                     + EscapeSequences.SET_TEXT_COLOR_WHITE + "[" + white + "] "
                     + EscapeSequences.SET_TEXT_COLOR_BLACK + "[" + black + "]"
                     + RESET_ALL
