@@ -133,11 +133,9 @@ public class ServerFacade {
         int statusCode = http.getResponseCode();
         if (statusCode / 100 != 2) {
             String errorMsg;
-            try (InputStream body = http.getInputStream()) {
+            try (InputStream body = http.getErrorStream()) {
                 Reader reader = new InputStreamReader(body);
                 errorMsg = (new Gson().fromJson(reader, ErrorResult.class)).getMessage();
-            } catch (Exception e) {
-                throw new BadStatusCodeException(statusCode, http.getResponseMessage());
             }
             throw new BadStatusCodeException(statusCode, http.getResponseMessage() + ", " + errorMsg);
         }
@@ -146,7 +144,7 @@ public class ServerFacade {
             Reader reader = new InputStreamReader(body);
             return new Gson().fromJson(reader, responseClass);
         } catch (Exception e) {
-            try (InputStream body = http.getInputStream()) {
+            try (InputStream body = http.getErrorStream()) {
                 Reader reader = new InputStreamReader(body);
                 return new Gson().fromJson(reader, ErrorResult.class);
             } catch (Exception f) {

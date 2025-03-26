@@ -149,7 +149,8 @@ public class Repl {
 
             return true;
         } catch (Exception e) {
-            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: " + e.getMessage());
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+            System.out.println(e.getMessage());
             return false;
         }
     }
@@ -227,7 +228,7 @@ public class Repl {
             System.out.println(EscapeSequences.RESET_TEXT_ITALIC + "Successfully logged out.");
             return true;
         } catch (Exception e) {
-            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: " + e.getMessage());
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.getMessage());
             return false;
         }
     }
@@ -269,6 +270,10 @@ public class Repl {
     }
 
     private void join(String id) {
+        if (validateGameId(id)) {
+            return;
+        }
+
         Scanner scanner = new Scanner(System.in);
         boolean loop = true;
         ChessGame.TeamColor color = null;
@@ -297,8 +302,27 @@ public class Repl {
     }
 
     private void observe(String id) {
+        if (validateGameId(id)) {
+            return;
+        }
+
         System.out.println("Observing game " + id);
-        // functionality requires websocket
+        game(ChessGame.TeamColor.WHITE);
+    }
+
+    private boolean validateGameId(String id) {
+        try {
+            if (!idMap.containsKey(Integer.parseInt(id))) {
+                System.out.print(RESET_ALL);
+                System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: invalid game id");
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            System.out.print(RESET_ALL);
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: invalid game id");
+            return true;
+        }
+        return false;
     }
 
     private void invalid() {
