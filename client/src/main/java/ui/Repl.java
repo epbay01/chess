@@ -101,15 +101,15 @@ public class Repl {
 
         System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "\nWhen logged in:");
         System.out.println(
-                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "logout, l: "
+                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "logout, lo: "
                 + RESET_ALL + "Logout of the server."
         );
         System.out.println(
-                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "list, lg: "
+                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "list, l: "
                 + RESET_ALL + "Lists all games and ids."
         );
         System.out.println(
-                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "join, jg [game id]: "
+                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "join, j [game id]: "
                 + RESET_ALL + "Joins the given game."
         );
         System.out.println(
@@ -117,7 +117,7 @@ public class Repl {
                 + RESET_ALL + "Observes the given game."
         );
         System.out.println(
-                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "create, cg [game name]: "
+                EscapeSequences.SET_TEXT_ITALIC + EscapeSequences.SET_TEXT_COLOR_BLUE + "create, c [game name]: "
                 + RESET_ALL + "Creates a new game, does not join it."
         );
 
@@ -134,9 +134,12 @@ public class Repl {
         String password = scanner.nextLine();
         password = password.strip();
 
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-        email = email.strip();
+        String email = "";
+        if (newUser) {
+            System.out.print("Email: ");
+            email = scanner.nextLine();
+            email = email.strip();
+        }
 
         var user = new UserData(username, password, email);
         try {
@@ -174,13 +177,13 @@ public class Repl {
             case "help", "h":
                 help();
                 break;
-            case "logout", "l":
+            case "logout", "lo":
                 loggedIn = !logout();
                 break;
-            case "list", "lg":
+            case "list", "l":
                 list();
                 break;
-            case "join", "jg":
+            case "join", "j":
                 if (inp.length < 2) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED
                             + "Error: Didn't input correct arguments.");
@@ -191,7 +194,7 @@ public class Repl {
                 }
                 join(inp[1]);
                 break;
-            case "create", "cg":
+            case "create", "c":
                 if (inp.length < 2) {
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED
                             + "Error: Didn't input correct arguments.");
@@ -275,10 +278,6 @@ public class Repl {
     }
 
     private void join(String id) {
-        if (validateGameId(id)) {
-            return;
-        }
-
         Scanner scanner = new Scanner(System.in);
         boolean loop = true;
         ChessGame.TeamColor color = null;
@@ -298,9 +297,9 @@ public class Repl {
         }
 
         try {
+            var gameRepl = new GameRepl(this, color, id);
             serverFacade.joinGame(authData, idMap.get(Integer.parseInt(id)), color);
             System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Successfully joined game!");
-            var gameRepl = new GameRepl(this, color, id);
             gameRepl.game();
         } catch (Exception e) {
             System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: " + e.getMessage());
@@ -311,19 +310,15 @@ public class Repl {
     protected boolean validateGameId(String id) {
         try {
             if (!idMap.containsKey(Integer.parseInt(id))) {
-                System.out.print(RESET_ALL);
-                System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: invalid game id");
-                return true;
+                return false;
             }
         } catch (NumberFormatException e) {
-            System.out.print(RESET_ALL);
-            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Error: invalid game id");
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
-    private void invalid() {
+    protected void invalid() {
         System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + "Invalid input. Type \"help\" or \"h\" for help.");
     }
 
@@ -338,7 +333,7 @@ public class Repl {
         return line.split(" ");
     }
 
-    private void waitForQ() {
+    protected void waitForQ() {
         System.out.println("Enter q to quit.");
         Scanner scanner = new Scanner(System.in);
         boolean loop = true;
