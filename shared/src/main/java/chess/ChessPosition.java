@@ -55,4 +55,8 @@ public class ChessPosition {
     public String toString() {
         return "(" + row + ", " + column + ")";
     }
+
+    public String prettyPrint() {
+        return "pretty print not implemented";
+    }
 }

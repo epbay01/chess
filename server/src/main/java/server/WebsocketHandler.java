@@ -55,7 +55,7 @@ public class WebsocketHandler {
                     sessions.sendToGame(command.getGameID(), message[0]); // updated board
                     sessions.sendToGame(command.getGameID(), message[1], session); // notification
                     if (message.length > 2) {
-                        sessions.sendToGame(command.getGameID(), message[2]); // check notification
+                        sessions.sendToGame(command.getGameID(), message[2]); // check
                     }
                     break;
                 case LEAVE:
