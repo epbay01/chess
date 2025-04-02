@@ -72,4 +72,8 @@ public class ChessMove {
                 ", promotionPiece=" + promotionPiece +
                 '}';
     }
+
+    public String prettyPrint() {
+        return "pretty print not implemented";
+    }
 }
