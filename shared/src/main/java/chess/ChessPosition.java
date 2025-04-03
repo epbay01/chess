@@ -57,6 +57,7 @@ public class ChessPosition {
     }
 
     public String prettyPrint() {
-        return "pretty print not implemented";
+        char col = (char) ('a' + column - 1);
+        return col + Integer.toString(row);
     }
 }

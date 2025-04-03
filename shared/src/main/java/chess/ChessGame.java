@@ -267,6 +267,27 @@ public class ChessGame {
     }
 
     /**
+     * Sets turn to null so all moves throw an exception. Winner is stored as check boolean.
+     */
+    public void resign(TeamColor color) {
+        turn = null;
+        whiteCheck = (color == TeamColor.WHITE);
+        blackCheck = (color == TeamColor.BLACK);
+    }
+
+    /**
+     * If game is over, returns the winner.
+     * @return Winner or null if no winner yet or stalemate.
+     */
+    public TeamColor getWinner() {
+        if (turn == null && (whiteCheck || blackCheck)) {
+            return (whiteCheck) ? TeamColor.WHITE : TeamColor.BLACK;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Sets this game's chessboard with a given board
      *
      * @param board the new board to use

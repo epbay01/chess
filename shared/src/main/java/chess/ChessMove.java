@@ -74,6 +74,6 @@ public class ChessMove {
     }
 
     public String prettyPrint() {
-        return "pretty print not implemented";
+        return start.prettyPrint() + " -> " + end.prettyPrint();
     }
 }
