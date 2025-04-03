@@ -80,7 +80,9 @@ public class WebsocketService {
 
             // if user isn't in the game itself, they are an observer and don't need to be removed
             if (validateUser(command, null)) {
-                newGameData = (command.getTeamColor() == ChessGame.TeamColor.WHITE) ? new GameData(
+                ChessGame.TeamColor color = nullCheckColor(command);
+
+                newGameData = (color == ChessGame.TeamColor.WHITE) ? new GameData(
                         gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(),
                         gameData.chessGame()
                 ) : new GameData(
@@ -111,14 +113,15 @@ public class WebsocketService {
             }
 
             ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
+            ChessGame.TeamColor color = nullCheckColor(command);
 
-            game.resign(command.getTeamColor());
+            game.resign(color);
             updateGame(game, command);
 
-            var winner = (command.getTeamColor() == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK
+            var winner = (color == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK
                     : ChessGame.TeamColor.WHITE;
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                    command.getTeamColor() + " resigned, " + winner  + " WON!");
+                    color + " resigned, " + winner  + " WON!");
 
         } catch (Exception e) {
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
@@ -174,5 +177,25 @@ public class WebsocketService {
         } catch (DataAccessException e) {
             return false;
         }
+    }
+
+    private static ChessGame.TeamColor nullCheckColor(UserGameCommand command) throws DataAccessException {
+        ChessGame.TeamColor color = command.getTeamColor();
+        GameData gameData = Server.gameDao.getGame(command.getGameID());
+
+        if (command.getTeamColor() == null) {
+            boolean white = gameData.whiteUsername().equals(command.getUsername());
+            boolean black = gameData.blackUsername().equals(command.getUsername());
+
+            if (white && black) {
+                color = gameData.chessGame().getTeamTurn();
+            } else if (white) {
+                color = ChessGame.TeamColor.WHITE;
+            } else if (black) {
+                color = ChessGame.TeamColor.BLACK;
+            }
+        }
+
+        return color;
     }
 }

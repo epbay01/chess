@@ -20,8 +20,27 @@ public class UserGameCommand {
     private final String username;
     private final ChessGame.TeamColor teamColor;
 
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
+        this.commandType = commandType;
+        this.authToken = authToken;
+        this.gameID = gameID;
+        this.username = null;
+        this.teamColor = null;
+        this.move = null;
+    }
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, ChessMove move) {
+        this.commandType = commandType;
+        this.authToken = authToken;
+        this.gameID = gameID;
+        this.move = move;
+        this.username = null;
+        this.teamColor = null;
+    }
+
     public UserGameCommand(CommandType commandType,
-                           String authToken, Integer gameID,
+                           String authToken,
+                           Integer gameID,
                            String username,
                            ChessGame.TeamColor teamColor) {
         this.commandType = commandType;
@@ -33,7 +52,8 @@ public class UserGameCommand {
     }
 
     public UserGameCommand(CommandType commandType,
-                           String authToken, Integer gameID,
+                           String authToken,
+                           Integer gameID,
                            String username,
                            ChessGame.TeamColor teamColor,
                            ChessMove move) {

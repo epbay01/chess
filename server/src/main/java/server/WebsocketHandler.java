@@ -1,7 +1,10 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.UserService;
@@ -12,6 +15,15 @@ import websocket.messages.ServerMessage;
 @WebSocket
 public class WebsocketHandler {
     public static WebsocketSessions sessions = new WebsocketSessions();
+
+    @OnWebSocketConnect
+    public void onConnect(Session session) {
+//        System.out.print(session.getRemoteAddress() + " connected");
+//        System.out.print(new Gson().toJson(new UserGameCommand(
+//                UserGameCommand.CommandType.CONNECT, "token", 1, "user",
+//                null
+//        )));
+    }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
@@ -36,6 +48,19 @@ public class WebsocketHandler {
 
     private boolean authenticate(UserGameCommand command) {
         return UserService.authenticate(command.getAuthToken());
+    }
+
+    private UserGameCommand accomodateEmptyFields(UserGameCommand command) throws DataAccessException {
+        String username = command.getUsername();
+        ChessGame.TeamColor teamColor = command.getTeamColor();
+
+        if (command.getUsername() == null) {
+            username = Server.authDao.getAuthByToken(command.getAuthToken()).username();
+        }
+        // team color can also be null, will handle elsewhere
+
+        return new UserGameCommand(command.getCommandType(), command.getAuthToken(),
+                command.getGameID(), username, command.getTeamColor());
     }
 
     private void sendMessage(ServerMessage[] message, Session session, UserGameCommand command) {

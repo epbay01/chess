@@ -6,6 +6,7 @@ import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 public class WebsocketSessions {
@@ -16,11 +17,17 @@ public class WebsocketSessions {
     }
 
     public void addSession(int gameId, Session session) {
+        if (!sessions.containsKey(gameId)) {
+            sessions.put(gameId, new HashSet<>());
+        }
         sessions.get(gameId).add(session);
     }
 
     public void removeSession(int gameId, Session session) {
         sessions.get(gameId).remove(session);
+        if (sessions.get(gameId).isEmpty()) {
+            sessions.remove(gameId);
+        }
     }
 
     public void sendToGame(int gameId, ServerMessage message) throws IOException {

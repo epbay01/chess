@@ -1,7 +1,6 @@
 package server;
 
 import dataaccess.*;
-import service.GameService;
 import spark.*;
 
 public class Server {
@@ -9,6 +8,7 @@ public class Server {
     public static UserDao userDao;
     public static GameDao gameDao;
     public static boolean useMemory;
+    private static final WebsocketHandler websocketHandler = new WebsocketHandler();
 
     static {
         try {
@@ -37,6 +37,8 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", websocketHandler);
 
         Spark.post("/user", Handler::handleRegister);
         Spark.post("/session", Handler::handleLogin);
