@@ -1,8 +1,6 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
-import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -16,9 +14,9 @@ public class WebsocketHandler {
     public static WebsocketSessions sessions = new WebsocketSessions();
 
     @OnWebSocketMessage
-    private void onMessage(Session session, String message) {
+    public void onMessage(Session session, String message) {
         var command = new Gson().fromJson(message, UserGameCommand.class);
-        ServerMessage[] outputMessage = new ServerMessage[1];
+        ServerMessage[] outputMessage;
 
         if (!authenticate(command)) {
             outputMessage = new ServerMessage[]{
@@ -41,7 +39,7 @@ public class WebsocketHandler {
     }
 
     private void sendMessage(ServerMessage[] message, Session session, UserGameCommand command) {
-        String json = new Gson().toJson(message);
+        String json = new Gson().toJson(message[0]);
 
         try {
             if (message[0].getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {

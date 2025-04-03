@@ -37,4 +37,8 @@ public class WebsocketSessions {
             }
         }
     }
+
+    public boolean validateSession(int gameId, Session session) {
+        return sessions.get(gameId).contains(session);
+    }
 }

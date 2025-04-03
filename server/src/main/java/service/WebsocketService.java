@@ -41,10 +41,9 @@ public class WebsocketService {
         String notifMessage = command.getUsername() + " has made a move: " + command.getMove().prettyPrint();
 
         try {
-            GameData gameData = Server.gameDao.getGame(command.getGameID());
-            ChessGame game = gameData.chessGame();
+            ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
 
-            if (!validateUser(command)) { throw new ServerException("User not in game"); }
+            if (!validateUser(command, session)) { throw new ServerException("User not in game"); }
 
             if (command.getMove() != null) {
                 game.makeMove(command.getMove());
@@ -53,10 +52,7 @@ public class WebsocketService {
                 msg3 = (ServerMessage)result[0];
                 game = (ChessGame)result[1];
 
-                Server.gameDao.updateGame(
-                        new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(),
-                                gameData.gameName(), game)
-                );
+                updateGame(game, command);
             } else {
                 throw new ServerException("Invalid move sent");
             }
@@ -83,7 +79,7 @@ public class WebsocketService {
             GameData newGameData;
 
             // if user isn't in the game itself, they are an observer and don't need to be removed
-            if (validateUser(command)) {
+            if (validateUser(command, null)) {
                 newGameData = (command.getTeamColor() == ChessGame.TeamColor.WHITE) ? new GameData(
                         gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(),
                         gameData.chessGame()
@@ -110,16 +106,26 @@ public class WebsocketService {
         ServerMessage msg1;
 
         try {
-            if (!validateUser(command)) {
+            if (!validateUser(command, session)) {
                 throw new ServerException("User not in game");
             }
+
+            ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
+
+            game.resign(command.getTeamColor());
+            updateGame(game, command);
+
+            var winner = (command.getTeamColor() == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK
+                    : ChessGame.TeamColor.WHITE;
+            msg1 = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                    command.getTeamColor() + " resigned, " + winner  + " WON!");
+
         } catch (Exception e) {
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             return new ServerMessage[]{msg1};
         }
 
-        return new ServerMessage[]{
-                new ServerMessage(ServerMessage.ServerMessageType.ERROR, "not implemented")};
+        return new ServerMessage[]{msg1};
     }
 
     private static Object[] checkLogic(ChessGame game) {
@@ -148,9 +154,20 @@ public class WebsocketService {
         return new Object[]{msg, game};
     }
 
-    private static boolean validateUser(UserGameCommand command) {
+    private static void updateGame(ChessGame game, UserGameCommand command) throws DataAccessException {
+        GameData gameData = Server.gameDao.getGame(command.getGameID());
+        GameData newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(),
+                gameData.gameName(), game);
+        Server.gameDao.updateGame(newGameData);
+    }
+
+    private static boolean validateUser(UserGameCommand command, Session session) {
         try {
             GameData gameData = Server.gameDao.getGame(command.getGameID());
+
+            if (!sessions.validateSession(command.getGameID(), session) && session != null) {
+                return false;
+            }
 
             return ( gameData.whiteUsername().equals(command.getUsername())
                     || gameData.blackUsername().equals(command.getUsername()) );
