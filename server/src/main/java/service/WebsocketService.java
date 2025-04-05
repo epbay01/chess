@@ -21,7 +21,11 @@ public class WebsocketService {
         String notifMessage = command.getUsername() + " has joined game " + command.getGameID();
 
         try {
-            ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
+            GameData gameData = Server.gameDao.getGame(command.getGameID());
+            if (gameData.chessGame() == null) {
+                throw new ServerException("Game does not exist");
+            }
+            ChessGame game = gameData.chessGame();
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
             sessions.addSession(command.getGameID(), session);
 
@@ -38,7 +42,7 @@ public class WebsocketService {
         ServerMessage msg1; // board
         ServerMessage msg2; // notification
         ServerMessage msg3 = null; // check
-        String notifMessage = command.getUsername() + " has made a move: " + command.getMove().prettyPrint();
+        String notifMessage;
 
         try {
             ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
@@ -46,6 +50,8 @@ public class WebsocketService {
             if (!validateUser(command, session)) { throw new ServerException("User not in game"); }
 
             if (command.getMove() != null) {
+                notifMessage = command.getUsername() + " has made a move: " + command.getMove().prettyPrint();
+
                 game.makeMove(command.getMove());
 
                 var result = checkLogic(game);
@@ -184,8 +190,12 @@ public class WebsocketService {
         GameData gameData = Server.gameDao.getGame(command.getGameID());
 
         if (command.getTeamColor() == null) {
-            boolean white = gameData.whiteUsername().equals(command.getUsername());
-            boolean black = gameData.blackUsername().equals(command.getUsername());
+            boolean white = false;
+            boolean black = false;
+            if (gameData.whiteUsername() != null && gameData.blackUsername() != null) {
+                white = gameData.whiteUsername().equals(command.getUsername());
+                black = gameData.blackUsername().equals(command.getUsername());
+            }
 
             if (white && black) {
                 color = gameData.chessGame().getTeamTurn();

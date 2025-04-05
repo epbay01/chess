@@ -13,6 +13,8 @@ import java.util.Objects;
  */
 public class ServerMessage {
     ServerMessageType serverMessageType;
+    ChessGame game;
+    String errorMessage;
     String message;
 
     public enum ServerMessageType {
@@ -27,20 +29,36 @@ public class ServerMessage {
     }
 
     public ServerMessage(ServerMessageType type, ChessGame chessGame) {
-        this.message = (new Gson()).toJson(chessGame);
         this.serverMessageType = type;
+        if (type == ServerMessageType.LOAD_GAME) {
+            this.game = chessGame;
+        }
     }
 
     public ServerMessage(ServerMessageType type, String message) {
-        this.message = message;
         this.serverMessageType = type;
+        if (type == ServerMessageType.NOTIFICATION) {
+            this.message = message;
+        } else if (type == ServerMessageType.ERROR) {
+            this.errorMessage = message;
+        } else {
+            this.game = (new Gson()).fromJson(message, ChessGame.class);
+        }
     }
 
     public ServerMessageType getServerMessageType() {
         return this.serverMessageType;
     }
 
-    public String getMessage() { return this.message; }
+    public String getMessage() {
+        if (this.serverMessageType == ServerMessageType.NOTIFICATION) {
+            return this.message;
+        } else if (this.serverMessageType == ServerMessageType.ERROR) {
+            return this.errorMessage;
+        } else {
+            return (new Gson()).toJson(this.game);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {

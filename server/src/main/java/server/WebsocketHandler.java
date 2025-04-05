@@ -28,7 +28,12 @@ public class WebsocketHandler {
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
         var command = new Gson().fromJson(message, UserGameCommand.class);
+        System.out.println("server received command: " + command.toString());
         ServerMessage[] outputMessage;
+
+        try {
+            command = accommodateEmptyFields(command);
+        } catch (DataAccessException ignored) {} // if throws, it will be caught by authenticate()
 
         if (!authenticate(command)) {
             outputMessage = new ServerMessage[]{
@@ -50,17 +55,16 @@ public class WebsocketHandler {
         return UserService.authenticate(command.getAuthToken());
     }
 
-    private UserGameCommand accomodateEmptyFields(UserGameCommand command) throws DataAccessException {
+    private UserGameCommand accommodateEmptyFields(UserGameCommand command) throws DataAccessException {
         String username = command.getUsername();
-        ChessGame.TeamColor teamColor = command.getTeamColor();
 
         if (command.getUsername() == null) {
             username = Server.authDao.getAuthByToken(command.getAuthToken()).username();
         }
-        // team color can also be null, will handle elsewhere
+        // team color can also be null, will handle in service
 
         return new UserGameCommand(command.getCommandType(), command.getAuthToken(),
-                command.getGameID(), username, command.getTeamColor());
+                command.getGameID(), username, command.getTeamColor(), command.getMove());
     }
 
     private void sendMessage(ServerMessage[] message, Session session, UserGameCommand command) {
@@ -76,6 +80,7 @@ public class WebsocketHandler {
                 case CONNECT:
                     session.getRemote().sendString(json); // board
                     sessions.sendToGame(command.getGameID(), message[1], session); // notification
+                    break;
                 case MAKE_MOVE:
                     sessions.sendToGame(command.getGameID(), message[0]); // updated board
                     sessions.sendToGame(command.getGameID(), message[1], session); // notification
