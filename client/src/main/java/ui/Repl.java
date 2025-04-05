@@ -189,7 +189,7 @@ public class Repl {
                             + "Error: Didn't input correct arguments.");
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_TEXT_ITALIC
                             + "Correct usage:"
-                            + RESET_ALL + " join [game id] | jg [game id]");
+                            + RESET_ALL + " join [game id] | j [game id]");
                     break;
                 }
                 join(inp[1]);
@@ -200,7 +200,7 @@ public class Repl {
                             + "Error: Didn't input correct arguments.");
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_TEXT_ITALIC
                             + "Correct usage:"
-                            + RESET_ALL + " create [game name] | cg [game name]");
+                            + RESET_ALL + " create [game name] | c [game name]");
                     break;
                 }
                 create(inp[1]);

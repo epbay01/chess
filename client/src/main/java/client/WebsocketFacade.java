@@ -2,22 +2,28 @@ package client;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
+import ui.GameRepl;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 import javax.websocket.*;
 
+import java.io.IOException;
 import java.net.URI;
 
 public class WebsocketFacade extends Endpoint {
     private final Session session;
+    private final GameRepl repl;
 
-    public WebsocketFacade(String url) throws Exception {
-        var uri = new URI(url.replace("http", "ws") + "/ws");
+    public WebsocketFacade(ServerFacade facade, GameRepl repl) throws Exception {
+        this.repl = repl;
+
+        var url = facade.getUrl("/ws");
+        var uri = new URI(url.replace("http", "ws"));
 
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.session = container.connectToServer(this, uri);
 
-        this.session.addMessageHandler((MessageHandler.Whole<String>) WebsocketFacade::handler);
+        this.session.addMessageHandler((MessageHandler.Whole<String>) this::handler);
     }
 
     @Override
@@ -25,7 +31,7 @@ public class WebsocketFacade extends Endpoint {
 
     // PRIVATE ON MESSAGE METHODS
 
-    private static void handler(String message) {
+    private void handler(String message) {
         var msg = new Gson().fromJson(message, ServerMessage.class);
 
         switch (msg.getServerMessageType()) {
@@ -35,21 +41,27 @@ public class WebsocketFacade extends Endpoint {
         }
     }
 
-    private static void loadGame(ServerMessage message) {}
+    private void loadGame(ServerMessage message) {}
 
-    private static void notify(ServerMessage message) {}
+    private void notify(ServerMessage message) {
+        repl.notify(message.getMessage());
+    }
 
-    private static void error(ServerMessage message) {}
+    private void error(ServerMessage message) {}
 
     // PUBLIC SEND METHODS
 
-    public static void connect() {}
+    public void connect() {}
 
-    public static void make_move(ChessMove move) {}
+    public void make_move(ChessMove move) {}
 
-    public static void leave() {}
+    public void leave() {}
 
-    public static void resign() {}
+    public void resign() {}
 
-    private void send(UserGameCommand command) {}
+    private void send(UserGameCommand command) throws IOException {
+        this.session.getBasicRemote().sendText(
+                new Gson().toJson(command)
+        );
+    }
 }

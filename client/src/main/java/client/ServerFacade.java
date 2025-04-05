@@ -24,7 +24,7 @@ public class ServerFacade {
         this.port = port;
     }
 
-    private String getUrl(String endpoint) {
+    protected String getUrl(String endpoint) {
         return "http://localhost:" + port + endpoint;
     }
 

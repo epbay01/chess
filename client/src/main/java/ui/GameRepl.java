@@ -4,6 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import client.WebsocketFacade;
 
 import java.security.InvalidParameterException;
 import java.util.Scanner;
@@ -13,8 +14,9 @@ public class GameRepl {
     private ChessGame.TeamColor color;
     private ChessGame game;
     private String gameId;
+    private WebsocketFacade websocketFacade;
 
-    public GameRepl(Repl parentRepl, ChessGame.TeamColor color, String id) {
+    public GameRepl(Repl parentRepl, ChessGame.TeamColor color, String id) throws Exception {
         this.parentRepl = parentRepl;
         this.color = color;
         this.game = null;
@@ -22,6 +24,12 @@ public class GameRepl {
             this.gameId = id;
         } else {
             throw new InvalidParameterException("invalid game id");
+        }
+
+        try {
+            this.websocketFacade = new WebsocketFacade(parentRepl.serverFacade, this);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to connect to server");
         }
     }
 
@@ -232,4 +240,9 @@ public class GameRepl {
 
     // will get the game from the server via websocket
     private void updateGame() {}
+
+    public void notify(String msg) {
+        System.out.print(Repl.RESET_ALL);
+        System.out.println(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + msg);
+    }
 }
