@@ -1,7 +1,9 @@
 package client;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
+import model.AuthData;
 import ui.GameRepl;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
@@ -41,17 +43,30 @@ public class WebsocketFacade extends Endpoint {
         }
     }
 
-    private void loadGame(ServerMessage message) {}
+    private void loadGame(ServerMessage message) {
+        repl.game = message.getGame();
+    }
 
     private void notify(ServerMessage message) {
         repl.notify(message.getMessage());
     }
 
-    private void error(ServerMessage message) {}
+    private void error(ServerMessage message) {
+        repl.error(message.getMessage());
+    }
 
     // PUBLIC SEND METHODS
 
-    public void connect() {}
+    public void connect(AuthData authData, int gameId, ChessGame.TeamColor color) {
+        var command = new UserGameCommand(
+                UserGameCommand.CommandType.CONNECT, authData.authToken(), gameId, authData.username(), color
+        );
+        try {
+            send(command);
+        } catch (IOException e) {
+            repl.error("Connection failed");
+        }
+    }
 
     public void make_move(ChessMove move) {}
 

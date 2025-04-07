@@ -10,16 +10,16 @@ import java.security.InvalidParameterException;
 import java.util.Scanner;
 
 public class GameRepl {
-    private Repl parentRepl;
-    private ChessGame.TeamColor color;
-    private ChessGame game;
-    private String gameId;
-    private WebsocketFacade websocketFacade;
+    private final Repl parentRepl;
+    private final ChessGame.TeamColor color;
+    private final String gameId;
+    private final WebsocketFacade websocketFacade;
+    public ChessGame game;
 
-    public GameRepl(Repl parentRepl, ChessGame.TeamColor color, String id) throws Exception {
+    public GameRepl(Repl parentRepl, ChessGame.TeamColor color, String id) {
         this.parentRepl = parentRepl;
         this.color = color;
-        this.game = null;
+        this.game = new ChessGame(); // TODO: this is temporary
         if (parentRepl.validateGameId(id)) {
             this.gameId = id;
         } else {
@@ -46,6 +46,8 @@ public class GameRepl {
 
     private void gameRepl() {
         boolean loop = true;
+        connect();
+        updateGame();
         printBoard(game.getBoard());
 
         while(loop) {
@@ -71,6 +73,7 @@ public class GameRepl {
     private void observeRepl() {
         boolean loop = true;
         printBoard(game.getBoard());
+        connect();
 
         while (loop) {
             String[] inputs = getInputObserver();
@@ -235,14 +238,19 @@ public class GameRepl {
 
     // will connect to websocket and init game state
     private void connect() {
-        this.game = new ChessGame();
+        websocketFacade.connect(parentRepl.authData, Integer.parseInt(gameId), color);
     }
 
     // will get the game from the server via websocket
     private void updateGame() {}
 
     public void notify(String msg) {
-        System.out.print(Repl.RESET_ALL);
+        System.out.print(Repl.RESET_ALL + "\n");
         System.out.println(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + msg);
+    }
+
+    public void error(String msg) {
+        System.out.print(Repl.RESET_ALL + "\n");
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + msg);
     }
 }
