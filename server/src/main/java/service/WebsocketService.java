@@ -45,12 +45,14 @@ public class WebsocketService {
         ServerMessage msg3 = null; // check
         String notifMessage;
 
-        System.out.println("makeMove called with command: " + command);
-
         try {
             command = new UserGameCommand(command.getCommandType(), command.getAuthToken(),
                     command.getGameID(), command.getUsername(), nullCheckColor(command), command.getMove());
-            ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
+            GameData data = Server.gameDao.getGame(command.getGameID());
+            if (data == null) {
+                throw new Exception("Game does not exist");
+            }
+            ChessGame game = data.chessGame();
 
             if (!validateUser(command, session)) { throw new ServerException("User not in game"); }
 
@@ -139,10 +141,8 @@ public class WebsocketService {
             System.out.println(color + " is resigning on game " + game + " with id " + command.getGameID());
 
             game.resign(color);
-            System.out.println("game after resign call: " + game);
 
             updateGame(game, command);
-            System.out.println("game updated");
 
             var winner = (color == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK
                     : ChessGame.TeamColor.WHITE;
@@ -150,7 +150,6 @@ public class WebsocketService {
                     color + " resigned, " + winner + " WON!");
 
         } catch (Exception e) {
-            System.out.println("exception thrown");
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             return new ServerMessage[]{msg1};
         }
@@ -188,15 +187,12 @@ public class WebsocketService {
         GameData gameData = Server.gameDao.getGame(command.getGameID());
         GameData newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(),
                 gameData.gameName(), game);
-        System.out.println("newGameData: " + newGameData);
         Server.gameDao.updateGame(newGameData);
     }
 
     private static boolean validateUser(UserGameCommand command, Session session) {
         try {
             GameData gameData = Server.gameDao.getGame(command.getGameID());
-
-            System.out.println("validating user " + command.getUsername() + " in gameData: " + gameData);
 
             if (!SESSIONS.validateSession(command.getGameID(), session) && session != null) {
                 System.out.println("failed to validate session");

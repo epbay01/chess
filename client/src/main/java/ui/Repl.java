@@ -348,4 +348,8 @@ public class Repl {
         List<GameData> games = serverFacade.listGames(authData);
         return games.get(Integer.parseInt(id) - 1).gameName();
     }
+
+    protected int getGameID(String id) {
+        return idMap.get(Integer.parseInt(id));
+    }
 }

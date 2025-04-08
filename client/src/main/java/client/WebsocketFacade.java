@@ -57,9 +57,17 @@ public class WebsocketFacade extends Endpoint {
 
     // PUBLIC SEND METHODS
 
-    public void connect(AuthData authData, int gameId, ChessGame.TeamColor color) {
+    public void command(UserGameCommand.CommandType commandType,
+                        AuthData authData,
+                        int gameId,
+                        ChessGame.TeamColor color) { command(commandType, authData, gameId, color, null); }
+    public void command(UserGameCommand.CommandType commandType,
+                        AuthData authData,
+                        int gameId,
+                        ChessGame.TeamColor color,
+                        ChessMove move) {
         var command = new UserGameCommand(
-                UserGameCommand.CommandType.CONNECT, authData.authToken(), gameId, authData.username(), color
+                commandType, authData.authToken(), gameId, authData.username(), color, move
         );
         try {
             send(command);
@@ -67,12 +75,6 @@ public class WebsocketFacade extends Endpoint {
             repl.error("Connection failed");
         }
     }
-
-    public void makeMove(ChessMove move) {}
-
-    public void leave() {}
-
-    public void resign() {}
 
     private void send(UserGameCommand command) throws IOException {
         this.session.getBasicRemote().sendText(

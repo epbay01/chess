@@ -107,7 +107,6 @@ public class DbGameDao implements GameDao {
                     ", gameName='" + newGameName
                     + "', chessGame='" + gson.toJson(gameData.chessGame())
                     + "' WHERE gameID=" + gameData.gameID();
-            System.out.println("SQL IN UPDATE GAME: " + str);
             try (var statement = conn.prepareStatement(str)) {
                 statement.executeUpdate();
             }

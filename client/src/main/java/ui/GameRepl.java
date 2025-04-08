@@ -1,10 +1,8 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import client.WebsocketFacade;
+import websocket.commands.UserGameCommand;
 
 import java.security.InvalidParameterException;
 import java.util.Scanner;
@@ -46,8 +44,6 @@ public class GameRepl {
 
     private void gameRepl() {
         boolean loop = true;
-        connect();
-        updateGame();
         printBoard(game.getBoard());
 
         while(loop) {
@@ -61,7 +57,20 @@ public class GameRepl {
                 case "quit", "leave", "q":
                     if (confirm()) {
                         loop = false;
+                        leave();
                     }
+                    break;
+                case "redraw", "r":
+                    System.out.print(EscapeSequences.ERASE_SCREEN);
+                    printBoard(game.getBoard());
+                    break;
+                case "move", "m":
+                    if (inputs.length < 3) {
+                        parentRepl.invalid();
+                        break;
+                    }
+                    String[] args = new String[]{inputs[1], inputs[2]};
+                    move(args);
                     break;
                 default:
                     parentRepl.invalid();
@@ -73,13 +82,13 @@ public class GameRepl {
     private void observeRepl() {
         boolean loop = true;
         printBoard(game.getBoard());
-        connect();
 
         while (loop) {
             String[] inputs = getInputObserver();
             switch (inputs[0]) {
                 case "quit", "leave", "q":
                     loop = false;
+                    leave();
                     break;
                 case "help", "h":
                     help();
@@ -114,7 +123,6 @@ public class GameRepl {
     }
 
     private void printBoard(ChessBoard board) {
-        updateGame();
 
         System.out.print(EscapeSequences.ERASE_SCREEN + Repl.RESET_ALL);
 
@@ -191,6 +199,23 @@ public class GameRepl {
         };
     }
 
+    private void move(String[] inp) {
+        if (inp.length > 2) {
+            parentRepl.invalid();
+            return;
+        }
+
+        var inp1 = inp[0].toCharArray();
+        var inp2 = inp[1].toCharArray();
+
+        var pos1 = new ChessPosition((inp1[0] - 'a' + 1),
+                Integer.parseInt(inp[0].substring(1)));
+        var pos2 = new ChessPosition((inp2[0] - 'a' + 1),
+                Integer.parseInt(inp[1].substring(1)));
+
+        sendMove(new ChessMove(pos1, pos2));
+    }
+
     private String[] getInput() {
         System.out.print(Repl.RESET_ALL);
         if (color == ChessGame.TeamColor.WHITE) {
@@ -236,13 +261,35 @@ public class GameRepl {
         }
     }
 
-    // will connect to websocket and init game state
+    // websocket facade functions
     private void connect() {
-        websocketFacade.connect(parentRepl.authData, Integer.parseInt(gameId), color);
+        websocketFacade.command(UserGameCommand.CommandType.CONNECT,
+                parentRepl.authData,
+                parentRepl.getGameID(gameId),
+                color);
     }
 
-    // will get the game from the server via websocket
-    private void updateGame() {}
+    private void sendMove(ChessMove move) {
+        websocketFacade.command(UserGameCommand.CommandType.MAKE_MOVE,
+                parentRepl.authData,
+                parentRepl.getGameID(gameId),
+                color,
+                move);
+    }
+
+    private void leave() {
+        websocketFacade.command(UserGameCommand.CommandType.LEAVE,
+                parentRepl.authData,
+                parentRepl.getGameID(gameId),
+                color);
+    }
+
+    private void resign() {
+        websocketFacade.command(UserGameCommand.CommandType.RESIGN,
+                parentRepl.authData,
+                parentRepl.getGameID(gameId),
+                color);
+    }
 
     public void notify(String msg) {
         System.out.print(Repl.RESET_ALL + "\n");
