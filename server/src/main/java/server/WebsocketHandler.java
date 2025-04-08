@@ -15,14 +15,11 @@ import websocket.messages.ServerMessage;
 @WebSocket
 public class WebsocketHandler {
     public static WebsocketSessions sessions = new WebsocketSessions();
+    private static WebsocketService service = new WebsocketService();
 
     @OnWebSocketConnect
     public void onConnect(Session session) {
 //        System.out.print(session.getRemoteAddress() + " connected");
-//        System.out.print(new Gson().toJson(new UserGameCommand(
-//                UserGameCommand.CommandType.CONNECT, "token", 1, "user",
-//                null
-//        )));
     }
 
     @OnWebSocketMessage
@@ -44,7 +41,7 @@ public class WebsocketHandler {
                 case CONNECT -> WebsocketService.connect(command, session);
                 case MAKE_MOVE -> WebsocketService.makeMove(command, session);
                 case LEAVE -> WebsocketService.leave(command, session);
-                case RESIGN -> WebsocketService.resign(command, session);
+                case RESIGN -> service.resign(command, session);
             };
         }
 

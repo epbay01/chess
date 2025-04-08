@@ -93,12 +93,17 @@ public class ChessGame {
 
         // turn check
         if (board.getPiece(move.getStartPosition()).getTeamColor() != turn) {
-            throw new InvalidMoveException("not your turn");
+            throw new InvalidMoveException("not your turn or piece");
         }
 
         // move validity check
         if (!validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException(move + " is not a valid move");
+        }
+
+        // end of game check
+        if (getWinner() != null) {
+            throw new InvalidMoveException("game is over, " + getWinner() + " won");
         }
 
         // modify the board
@@ -269,20 +274,26 @@ public class ChessGame {
     /**
      * Sets turn to null so all moves throw an exception. Winner is stored as check boolean.
      */
-    public void resign(TeamColor color) {
-        turn = null;
-        whiteCheck = (color == TeamColor.WHITE);
-        blackCheck = (color == TeamColor.BLACK);
+    public void resign(TeamColor color) throws InvalidMoveException {
+        if (getWinner() == null) {
+            this.turn = null;
+            this.whiteCheck = (color == TeamColor.WHITE);
+            this.blackCheck = (color == TeamColor.BLACK);
+        } else {
+            throw new InvalidMoveException("game is already over, " + getWinner() + " won");
+        }
     }
 
     /**
      * If game is over, returns the winner.
      * @return Winner or null if no winner yet or stalemate.
      */
-    public TeamColor getWinner() {
-        if (turn == null && (whiteCheck || blackCheck)) {
-            return (whiteCheck) ? TeamColor.WHITE : TeamColor.BLACK;
-        } else {
+    public String getWinner() {
+        if (turn == null && (whiteCheck ^ blackCheck)) { // xor check bools means one team won
+            return ((whiteCheck) ? TeamColor.WHITE : TeamColor.BLACK).toString();
+        } else if (turn == null) { // both checks are same but turn is null then stalemate
+            return "STALEMATE";
+        } else { // if turn != null game is not over
             return null;
         }
     }
@@ -319,5 +330,14 @@ public class ChessGame {
     @Override
     public int hashCode() {
         return Objects.hash(board, turn, whiteCheck, blackCheck);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "turn=" + turn +
+                ", whiteCheck=" + whiteCheck +
+                ", blackCheck=" + blackCheck +
+                '}';
     }
 }

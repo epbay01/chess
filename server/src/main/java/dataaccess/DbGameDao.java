@@ -5,7 +5,9 @@ import com.google.gson.Gson;
 import model.GameData;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DbGameDao implements GameDao {
@@ -78,9 +80,10 @@ public class DbGameDao implements GameDao {
     public GameData getGame(int gameID) throws DataAccessException {
         GameData game;
         try (Connection conn = DatabaseManager.getConnection()) {
-            ResultSet resultSet = conn.prepareStatement("SELECT * FROM game WHERE gameID=" + gameID)
-                    .executeQuery();
-            game = getNextGame(resultSet);
+            try (var statement = conn.prepareStatement("SELECT * FROM game WHERE gameID=" + gameID)) {
+                ResultSet resultSet = statement.executeQuery();
+                game = getNextGame(resultSet);
+            }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
@@ -100,11 +103,16 @@ public class DbGameDao implements GameDao {
                     ((newWhiteUsername != null) ? "'" + newWhiteUsername + "'" : "NULL") +
                     ", blackUsername=" +
                     ((newBlackUsername != null) ? "'" + newBlackUsername + "'" : "NULL") +
-                    ", gameName='" + newGameName + "' WHERE gameID=" + gameData.gameID();
-            conn.prepareStatement(str).executeUpdate();
+                    ", gameName='" + newGameName
+                    + "', chessGame='" + gson.toJson(gameData.chessGame())
+                    + "' WHERE gameID=" + gameData.gameID();
+            try (var statement = conn.prepareStatement(str)) {
+                statement.executeUpdate();
+            }
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
+        System.out.println("game updated in db");
     }
 
     @Override

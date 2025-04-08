@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import dataaccess.DataAccessException;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -49,9 +50,9 @@ public class WebsocketService {
 
             if (!validateUser(command, session)) { throw new ServerException("User not in game"); }
 
-            if (command.getMove() != null) {
+            if (command.getMove() != null && command.getTeamColor() != game.getTeamTurn()) {
                 notifMessage = command.getUsername() + " has made a move: " + command.getMove().prettyPrint();
-
+                
                 game.makeMove(command.getMove());
 
                 var result = checkLogic(game);
@@ -110,7 +111,7 @@ public class WebsocketService {
         return new ServerMessage[]{msg1};
     }
 
-    public static ServerMessage[] resign(UserGameCommand command, Session session) {
+    public ServerMessage[] resign(UserGameCommand command, Session session) {
         ServerMessage msg1;
 
         try {
@@ -121,15 +122,21 @@ public class WebsocketService {
             ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
             ChessGame.TeamColor color = nullCheckColor(command);
 
+            System.out.println(color + " is resigning on game " + game + " with id " + command.getGameID());
+
             game.resign(color);
+            System.out.println("game after resign call: " + game);
+
             updateGame(game, command);
+            System.out.println("game updated");
 
             var winner = (color == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK
                     : ChessGame.TeamColor.WHITE;
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                    color + " resigned, " + winner  + " WON!");
+                    color + " resigned, " + winner + " WON!");
 
         } catch (Exception e) {
+            System.out.println("exception thrown");
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             return new ServerMessage[]{msg1};
         }
@@ -137,7 +144,7 @@ public class WebsocketService {
         return new ServerMessage[]{msg1};
     }
 
-    private static Object[] checkLogic(ChessGame game) {
+    private static Object[] checkLogic(ChessGame game) throws InvalidMoveException {
         ServerMessage msg = null;
 
         if (game.isInCheck(game.getTeamTurn())) {
@@ -167,6 +174,7 @@ public class WebsocketService {
         GameData gameData = Server.gameDao.getGame(command.getGameID());
         GameData newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(),
                 gameData.gameName(), game);
+        System.out.println("newGameData: " + newGameData);
         Server.gameDao.updateGame(newGameData);
     }
 

@@ -36,7 +36,9 @@ public class WebsocketSessions {
     public void sendToGame(int gameId, ServerMessage message, Session exclude) throws IOException {
         String msg = new Gson().toJson(message);
         for (Session s : sessions.get(gameId)) {
-            if (!s.equals(exclude) && s.isOpen()) {
+            // compares ip addresses to determine if session is the same
+            var ip = (exclude != null) ? exclude.getRemoteAddress() : null;
+            if (!s.getRemoteAddress().equals(ip) && s.isOpen()) {
                 s.getRemote().sendString(msg);
             } else if (!s.isOpen()) {
                 s.close();
