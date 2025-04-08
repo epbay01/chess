@@ -68,7 +68,7 @@ public class WebsocketFacade extends Endpoint {
         }
     }
 
-    public void make_move(ChessMove move) {}
+    public void makeMove(ChessMove move) {}
 
     public void leave() {}
 

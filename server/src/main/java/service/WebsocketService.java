@@ -14,7 +14,7 @@ import websocket.messages.ServerMessage;
 import java.rmi.ServerException;
 
 public class WebsocketService {
-    private final static WebsocketSessions sessions = WebsocketHandler.sessions;
+    private final static WebsocketSessions SESSIONS = WebsocketHandler.sessions;
 
     public static ServerMessage[] connect(UserGameCommand command, Session session) {
         ServerMessage msg1; // board
@@ -28,7 +28,7 @@ public class WebsocketService {
             }
             ChessGame game = gameData.chessGame();
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
-            sessions.addSession(command.getGameID(), session);
+            SESSIONS.addSession(command.getGameID(), session);
 
             msg2 = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notifMessage);
         } catch (Exception e) {
@@ -111,7 +111,7 @@ public class WebsocketService {
                 }
             }
 
-            sessions.removeSession(command.getGameID(), session);
+            SESSIONS.removeSession(command.getGameID(), session);
 
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                     command.getUsername() + " has left the game.");
@@ -198,7 +198,7 @@ public class WebsocketService {
 
             System.out.println("validating user " + command.getUsername() + " in gameData: " + gameData);
 
-            if (!sessions.validateSession(command.getGameID(), session) && session != null) {
+            if (!SESSIONS.validateSession(command.getGameID(), session) && session != null) {
                 System.out.println("failed to validate session");
                 return false;
             }

@@ -8,7 +8,7 @@ public class Server {
     public static UserDao userDao;
     public static GameDao gameDao;
     public static boolean useMemory;
-    private static final WebsocketHandler websocketHandler = new WebsocketHandler();
+    private static final WebsocketHandler WEBSOCKET_HANDLER = new WebsocketHandler();
 
     static {
         try {
@@ -38,7 +38,7 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        Spark.webSocket("/ws", websocketHandler);
+        Spark.webSocket("/ws", WEBSOCKET_HANDLER);
 
         Spark.post("/user", Handler::handleRegister);
         Spark.post("/session", Handler::handleLogin);

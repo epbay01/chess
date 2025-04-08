@@ -164,7 +164,7 @@ public class GameRepl {
             System.out.print(Repl.RESET_ALL + "\n");
         }
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
-        for (int i = 0; i < 10; i++) System.out.print(EscapeSequences.EMPTY);
+        for (int i = 0; i < 10; i++) { System.out.print(EscapeSequences.EMPTY); }
 
         System.out.print(Repl.RESET_ALL + "\n\n");
     }
