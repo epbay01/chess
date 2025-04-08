@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import model.GameData;
 
 import java.sql.Connection;
@@ -97,7 +98,7 @@ public class DbGameDao implements GameDao {
         String newBlackUsername = (gameData.blackUsername() != null) ?
                 gameData.blackUsername().replaceAll("'", "''") : null;
         String newGameName = gameData.gameName().replaceAll("'", "''");
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().serializeNulls().create();
         try (Connection conn = DatabaseManager.getConnection()) {
             String str = "UPDATE game SET whiteUsername=" +
                     ((newWhiteUsername != null) ? "'" + newWhiteUsername + "'" : "NULL") +
@@ -106,6 +107,7 @@ public class DbGameDao implements GameDao {
                     ", gameName='" + newGameName
                     + "', chessGame='" + gson.toJson(gameData.chessGame())
                     + "' WHERE gameID=" + gameData.gameID();
+            System.out.println("SQL IN UPDATE GAME: " + str);
             try (var statement = conn.prepareStatement(str)) {
                 statement.executeUpdate();
             }

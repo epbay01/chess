@@ -86,6 +86,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        System.out.println("attempting move " + move.prettyPrint() + " on " + turn + "'s turn");
+
         // space check
         if (board.getPiece(move.getStartPosition()) == null) {
             throw new InvalidMoveException("space has no piece");
@@ -136,9 +138,9 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         // given the position of the king, checks if the team is in check
         ChessPosition king = board.findKing(teamColor);
-        System.out.println(king + " is king for " + teamColor);
+        // System.out.println(king + " is king for " + teamColor);
         setCheck(teamColor, checkForSelfCheck(new ChessMove(king, king), teamColor));
-        System.out.println("white check: " + whiteCheck + ", black check: " + blackCheck);
+        // System.out.println("white check: " + whiteCheck + ", black check: " + blackCheck);
 
         if (teamColor == TeamColor.WHITE) {
             return whiteCheck;
@@ -163,7 +165,7 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         // can't be in checkmate if not in check, that is a stalemate
-        System.out.print(board + "\n");
+        // System.out.print(board + "\n");
         if (!isInCheck(teamColor)) {
             return false;
         }
@@ -199,7 +201,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         // same conditions as checkmate (no possible moves) but not in check
-        System.out.print(board + "\n");
+        // System.out.print(board + "\n");
         if (isInCheck(teamColor)) {
             return false;
         }
@@ -275,6 +277,7 @@ public class ChessGame {
      * Sets turn to null so all moves throw an exception. Winner is stored as check boolean.
      */
     public void resign(TeamColor color) throws InvalidMoveException {
+        System.out.println("resign called with " + color + " and game state " + this);
         if (getWinner() == null) {
             this.turn = null;
             this.whiteCheck = (color == TeamColor.WHITE);
@@ -290,10 +293,13 @@ public class ChessGame {
      */
     public String getWinner() {
         if (turn == null && (whiteCheck ^ blackCheck)) { // xor check bools means one team won
+            System.out.println("getWinner() returns winner");
             return ((whiteCheck) ? TeamColor.WHITE : TeamColor.BLACK).toString();
         } else if (turn == null) { // both checks are same but turn is null then stalemate
+            System.out.println("getWinner() returns stalemate");
             return "STALEMATE";
         } else { // if turn != null game is not over
+            System.out.println("getWinner() returns null");
             return null;
         }
     }
@@ -338,6 +344,7 @@ public class ChessGame {
                 "turn=" + turn +
                 ", whiteCheck=" + whiteCheck +
                 ", blackCheck=" + blackCheck +
+                ", board=\n" + board +
                 '}';
     }
 }

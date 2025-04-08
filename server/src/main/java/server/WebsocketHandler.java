@@ -24,13 +24,16 @@ public class WebsocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
-        var command = new Gson().fromJson(message, UserGameCommand.class);
-        System.out.println("server received command: " + command.toString());
+        var oldCommand = new Gson().fromJson(message, UserGameCommand.class);
+        UserGameCommand command;
+        System.out.println("server received " + oldCommand.getCommandType() + " command: " + oldCommand);
         ServerMessage[] outputMessage;
 
         try {
-            command = accommodateEmptyFields(command);
-        } catch (DataAccessException ignored) {} // if throws, it will be caught by authenticate()
+            command = accommodateEmptyFields(oldCommand);
+        } catch (DataAccessException ignored) {
+            command = oldCommand;
+        } // if throws, it will be caught by authenticate()
 
         if (!authenticate(command)) {
             outputMessage = new ServerMessage[]{

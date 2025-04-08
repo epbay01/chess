@@ -45,12 +45,16 @@ public class WebsocketService {
         ServerMessage msg3 = null; // check
         String notifMessage;
 
+        System.out.println("makeMove called with command: " + command);
+
         try {
+            command = new UserGameCommand(command.getCommandType(), command.getAuthToken(),
+                    command.getGameID(), command.getUsername(), nullCheckColor(command), command.getMove());
             ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
 
             if (!validateUser(command, session)) { throw new ServerException("User not in game"); }
 
-            if (command.getMove() != null && command.getTeamColor() != game.getTeamTurn()) {
+            if (command.getMove() != null && command.getTeamColor() == game.getTeamTurn()) {
                 notifMessage = command.getUsername() + " has made a move: " + command.getMove().prettyPrint();
                 
                 game.makeMove(command.getMove());
@@ -85,19 +89,26 @@ public class WebsocketService {
             GameData gameData = Server.gameDao.getGame(command.getGameID());
             GameData newGameData;
 
+            command = new UserGameCommand(command.getCommandType(), command.getAuthToken(),
+                    command.getGameID(), command.getUsername(), nullCheckColor(command), command.getMove());
+
             // if user isn't in the game itself, they are an observer and don't need to be removed
             if (validateUser(command, null)) {
-                ChessGame.TeamColor color = nullCheckColor(command);
+                ChessGame.TeamColor color = command.getTeamColor();
 
-                newGameData = (color == ChessGame.TeamColor.WHITE) ? new GameData(
-                        gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(),
-                        gameData.chessGame()
-                ) : new GameData(
-                        gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(),
-                        gameData.chessGame()
-                );
-
-                Server.gameDao.updateGame(newGameData);
+                if (color == ChessGame.TeamColor.WHITE) {
+                    newGameData = new GameData(
+                            gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(),
+                            gameData.chessGame()
+                    );
+                    Server.gameDao.updateGame(newGameData);
+                } else if (color == ChessGame.TeamColor.BLACK) {
+                    newGameData = new GameData(
+                            gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(),
+                            gameData.chessGame()
+                    );
+                    Server.gameDao.updateGame(newGameData);
+                }
             }
 
             sessions.removeSession(command.getGameID(), session);
@@ -115,12 +126,15 @@ public class WebsocketService {
         ServerMessage msg1;
 
         try {
+            ChessGame.TeamColor color = nullCheckColor(command);
+            command = new UserGameCommand(command.getCommandType(), command.getAuthToken(), command.getGameID(),
+                    command.getUsername(), nullCheckColor(command), command.getMove());
+
             if (!validateUser(command, session)) {
                 throw new ServerException("User not in game");
             }
 
             ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
-            ChessGame.TeamColor color = nullCheckColor(command);
 
             System.out.println(color + " is resigning on game " + game + " with id " + command.getGameID());
 
@@ -182,12 +196,24 @@ public class WebsocketService {
         try {
             GameData gameData = Server.gameDao.getGame(command.getGameID());
 
+            System.out.println("validating user " + command.getUsername() + " in gameData: " + gameData);
+
             if (!sessions.validateSession(command.getGameID(), session) && session != null) {
+                System.out.println("failed to validate session");
                 return false;
             }
 
-            return ( gameData.whiteUsername().equals(command.getUsername())
-                    || gameData.blackUsername().equals(command.getUsername()) );
+            if (command.getTeamColor() != null) {
+                if (command.getTeamColor() == ChessGame.TeamColor.WHITE && gameData.whiteUsername() != null) {
+                    return gameData.whiteUsername().equals(command.getUsername());
+                } else if (command.getTeamColor() == ChessGame.TeamColor.BLACK && gameData.blackUsername() != null) {
+                    return gameData.blackUsername().equals(command.getUsername());
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         } catch (DataAccessException e) {
             return false;
         }
@@ -198,11 +224,15 @@ public class WebsocketService {
         GameData gameData = Server.gameDao.getGame(command.getGameID());
 
         if (command.getTeamColor() == null) {
+            System.out.println("team color not passed in, attempting auto-fill");
             boolean white = false;
             boolean black = false;
             if (gameData.whiteUsername() != null && gameData.blackUsername() != null) {
                 white = gameData.whiteUsername().equals(command.getUsername());
                 black = gameData.blackUsername().equals(command.getUsername());
+            } else {
+                if (gameData.whiteUsername() != null) { white = true; }
+                if (gameData.blackUsername() != null) { black = true; }
             }
 
             if (white && black) {
@@ -214,6 +244,7 @@ public class WebsocketService {
             }
         }
 
+        System.out.println("command color: " + color);
         return color;
     }
 }
