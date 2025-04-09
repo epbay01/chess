@@ -19,7 +19,7 @@ public class WebsocketService {
     public static ServerMessage[] connect(UserGameCommand command, Session session) {
         ServerMessage msg1; // board
         ServerMessage msg2; // notification
-        String notifMessage = command.getUsername() + " has joined game " + command.getGameID();
+        String notifMessage = command.getUsername() + " has joined the game";
 
         try {
             GameData gameData = Server.gameDao.getGame(command.getGameID());

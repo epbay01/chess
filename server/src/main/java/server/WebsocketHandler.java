@@ -11,6 +11,8 @@ import service.WebsocketService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
+import java.util.Arrays;
+
 @WebSocket
 public class WebsocketHandler {
     public static WebsocketSessions sessions = new WebsocketSessions();
@@ -69,7 +71,7 @@ public class WebsocketHandler {
     private void sendMessage(ServerMessage[] message, Session session, UserGameCommand command) {
         String json = new Gson().toJson(message[0]);
 
-        System.out.println("sending message (and others): " + json);
+        System.out.println("sending " + Arrays.toString(message));
 
         try {
             if (message[0].getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {

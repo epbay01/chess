@@ -208,10 +208,10 @@ public class GameRepl {
         var inp1 = inp[0].toCharArray();
         var inp2 = inp[1].toCharArray();
 
-        var pos1 = new ChessPosition((inp1[0] - 'a' + 1),
-                Integer.parseInt(inp[0].substring(1)));
-        var pos2 = new ChessPosition((inp2[0] - 'a' + 1),
-                Integer.parseInt(inp[1].substring(1)));
+        var pos1 = new ChessPosition(Integer.parseInt(inp[0].substring(1)),
+                (inp1[0] - 'a' + 1));
+        var pos2 = new ChessPosition(Integer.parseInt(inp[1].substring(1)),
+                (inp2[0] - 'a' + 1));
 
         sendMove(new ChessMove(pos1, pos2));
     }
