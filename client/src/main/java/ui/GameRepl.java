@@ -5,6 +5,7 @@ import client.WebsocketFacade;
 import websocket.commands.UserGameCommand;
 
 import java.security.InvalidParameterException;
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class GameRepl {
@@ -81,6 +82,12 @@ public class GameRepl {
                         resign();
                     }
                     break;
+                case "highlight", "show", "s":
+                    if (inputs.length != 2) {
+                        parentRepl.invalid();
+                    }
+                    highlight(inputs[1]);
+                    break;
                 default:
                     parentRepl.invalid();
                     break;
@@ -125,13 +132,22 @@ public class GameRepl {
         System.out.println("\n" + EscapeSequences.SET_TEXT_COLOR_GREEN + "When playing:");
         System.out.println(command + "move, m [start letter][start number] [end letter][end number]: " + Repl.RESET_ALL
                 + "Moves the piece at the given start position to the end position if valid.");
-        System.out.println(command + "highlight, show, s: " + Repl.RESET_ALL + "Highlights all legal moves.");
+        System.out.println(command + "highlight, show, s [letter][number]: " + Repl.RESET_ALL
+                + "Highlights all legal moves for the given piece.");
         System.out.println(command + "resign: " + Repl.RESET_ALL + "Resigns the game." + "\n");
 
         parentRepl.waitForQ();
     }
 
-    private void printBoard(ChessBoard board) {
+    private void printBoard(ChessBoard board) { printBoard(board, null); }
+    private void printBoard(ChessBoard board, ChessPosition highlight) {
+        HashSet<ChessPosition> positionsToHighlight = new HashSet<>();
+        if (highlight != null) {
+            this.game.validMoves(highlight).forEach(
+                    (item) -> positionsToHighlight.add(item.getEndPosition())
+            );
+            positionsToHighlight.add(highlight);
+        }
 
         System.out.print(EscapeSequences.ERASE_SCREEN + Repl.RESET_ALL);
 
@@ -167,10 +183,14 @@ public class GameRepl {
                     x = 8 - j;
                 }
 
-                if (currentlyWhite) {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + getChessPiece(board, y, x));
+                if (positionsToHighlight.contains(new ChessPosition(y, x))) {
+                    highlightPosition(y, x, currentlyWhite);
                 } else {
-                    System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + getChessPiece(board, y, x));
+                    if (currentlyWhite) {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY + getChessPiece(board, y, x));
+                    } else {
+                        System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY + getChessPiece(board, y, x));
+                    }
                 }
 
                 if (j != 7) {
@@ -206,6 +226,12 @@ public class GameRepl {
             case PAWN -> (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ?
                     EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN;
         };
+    }
+
+    private void highlightPosition(int y, int x, boolean light) {
+        String piece = getChessPiece(game.getBoard(), y, x);
+        String background = (light) ? EscapeSequences.SET_BG_COLOR_RED : EscapeSequences.SET_BG_COLOR_MAGENTA;
+        System.out.print(Repl.RESET_ALL + background + piece);
     }
 
     private void move(String[] inp) {
@@ -276,6 +302,14 @@ public class GameRepl {
                 return false;
             }
         }
+    }
+
+    private void highlight(String inp) {
+        var inp1 = inp.toCharArray();
+        var pos = new ChessPosition(Integer.parseInt(inp.substring(1)),
+                (inp1[0] - 'a' + 1));
+
+        printBoard(game.getBoard(), pos);
     }
 
     // websocket facade functions
