@@ -18,11 +18,6 @@ public class WebsocketHandler {
     public static WebsocketSessions sessions = new WebsocketSessions();
     private static WebsocketService service = new WebsocketService();
 
-//    @OnWebSocketConnect
-//    public void onConnect(Session session) {
-//        System.out.print(session.getRemoteAddress() + " connected");
-//    }
-
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
         var oldCommand = new Gson().fromJson(message, UserGameCommand.class);

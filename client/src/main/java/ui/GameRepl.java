@@ -19,7 +19,7 @@ public class GameRepl {
     public GameRepl(Repl parentRepl, ChessGame.TeamColor color, String id) {
         this.parentRepl = parentRepl;
         this.color = color;
-        this.game = new ChessGame(); // TODO: this is temporary
+        this.game = new ChessGame();
         if (parentRepl.validateGameId(id)) {
             this.gameId = id;
         } else {
@@ -342,7 +342,6 @@ public class GameRepl {
                 color);
     }
 
-    public void notify(String msg) { notify(msg, null); }
     public void notify(String msg, String[] winData) {
         System.out.print(Repl.RESET_ALL + "\n");
         System.out.println(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + msg);
