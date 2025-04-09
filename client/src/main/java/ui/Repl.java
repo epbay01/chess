@@ -352,4 +352,35 @@ public class Repl {
     protected int getGameID(String id) {
         return idMap.get(Integer.parseInt(id));
     }
+
+    protected void notifyWin(String winner, String gameName, String loser, ChessGame.TeamColor winnerColor) {
+        System.out.print(RESET_ALL);
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_YELLOW + EscapeSequences.BLACK_QUEEN);
+        if (winnerColor == ChessGame.TeamColor.WHITE) {
+            System.out.print(
+                    EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE
+                    + " " + winner + " won the game " + gameName + "!!\n" +
+                    EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_BLACK
+                    + "Better luck next time, " + loser + RESET_ALL
+            );
+        } else if (winnerColor == ChessGame.TeamColor.BLACK) {
+            System.out.print(
+                    EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_BLACK
+                            + " " + winner + " won the game " + gameName + "!!\n" +
+                            EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE
+                            + "Better luck next time, " + loser + RESET_ALL
+            );
+        } else {
+            System.out.print(
+                    EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_COLOR_WHITE
+                    + "Stalemate!" + RESET_ALL
+            );
+        }
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_YELLOW + EscapeSequences.WHITE_QUEEN);
+
+        System.out.print(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + "chess"
+                + RESET_ALL + " | "
+                + EscapeSequences.SET_TEXT_COLOR_GREEN + authData.username()
+                + RESET_ALL + " >> ");
+    }
 }

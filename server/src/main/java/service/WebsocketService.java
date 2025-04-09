@@ -61,7 +61,7 @@ public class WebsocketService {
                 
                 game.makeMove(command.getMove());
 
-                var result = checkLogic(game);
+                var result = checkLogic(data);
                 msg3 = (ServerMessage)result[0];
                 game = (ChessGame)result[1];
 
@@ -136,7 +136,8 @@ public class WebsocketService {
                 throw new ServerException("User not in game");
             }
 
-            ChessGame game = Server.gameDao.getGame(command.getGameID()).chessGame();
+            GameData data = Server.gameDao.getGame(command.getGameID());
+            ChessGame game = data.chessGame();
 
             System.out.println(color + " is resigning on game " + game + " with id " + command.getGameID());
 
@@ -146,8 +147,14 @@ public class WebsocketService {
 
             var winner = (color == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK
                     : ChessGame.TeamColor.WHITE;
+            var winData = new String[]{
+                    (winner == ChessGame.TeamColor.WHITE) ? data.whiteUsername() : data.blackUsername(),
+                    data.gameName(),
+                    (winner == ChessGame.TeamColor.WHITE) ? data.blackUsername() : data.whiteUsername(),
+                    winner.toString()
+            };
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                    color + " resigned, " + winner + " WON!");
+                    color + " resigned, " + winner + " WON!", winData);
 
         } catch (Exception e) {
             msg1 = new ServerMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
@@ -157,7 +164,8 @@ public class WebsocketService {
         return new ServerMessage[]{msg1};
     }
 
-    private static Object[] checkLogic(ChessGame game) throws InvalidMoveException {
+    private static Object[] checkLogic(GameData data) throws InvalidMoveException {
+        ChessGame game = data.chessGame();
         ServerMessage msg = null;
 
         if (game.isInCheck(game.getTeamTurn())) {
@@ -167,16 +175,23 @@ public class WebsocketService {
         }
 
         if (game.isInStalemate(game.getTeamTurn())) {
+            var winData = new String[]{"", data.gameName(), "", ""};
             msg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                    "Game is in stalemate");
+                    "Game is in stalemate", winData);
             game.resign(null);
         }
 
         if (game.isInCheckmate(game.getTeamTurn())) {
             var winner = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK
                     : ChessGame.TeamColor.WHITE;
+            var winData = new String[]{
+                    (winner == ChessGame.TeamColor.WHITE) ? data.whiteUsername() : data.blackUsername(),
+                    data.gameName(),
+                    (winner == ChessGame.TeamColor.WHITE) ? data.blackUsername() : data.whiteUsername(),
+                    winner.toString()
+            };
             msg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                    game.getTeamTurn() + " is in checkmate, " + winner + " WON!");
+                    game.getTeamTurn() + " is in checkmate, " + winner + " WON!", winData);
             game.resign(game.getTeamTurn());
         }
 

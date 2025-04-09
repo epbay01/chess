@@ -77,8 +77,8 @@ public class GameRepl {
                     break;
                 case "resign":
                     if (confirm()) {
-                        resign();
                         loop = false;
+                        resign();
                     }
                     break;
                 default:
@@ -308,9 +308,17 @@ public class GameRepl {
                 color);
     }
 
-    public void notify(String msg) {
+    public void notify(String msg) { notify(msg, null); }
+    public void notify(String msg, String[] winData) {
         System.out.print(Repl.RESET_ALL + "\n");
         System.out.println(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + msg);
+        if (msg.contains("WON") || msg.contains("stalemate")) {
+            if (winData != null && winData.length == 4) {
+                var c = (winData[3].equals("")) ? null : ChessGame.TeamColor.valueOf(winData[3]);
+                parentRepl.notifyWin(winData[0], winData[1], winData[2], c);
+            }
+            return;
+        }
         if (observing) {
             getInputObserverPrint();
         } else {
