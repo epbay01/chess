@@ -12,6 +12,7 @@ public class GameRepl {
     private final ChessGame.TeamColor color;
     private final String gameId;
     private final WebsocketFacade websocketFacade;
+    private boolean observing;
     public ChessGame game;
 
     public GameRepl(Repl parentRepl, ChessGame.TeamColor color, String id) {
@@ -33,11 +34,13 @@ public class GameRepl {
 
     protected void observe() {
         System.out.println(EscapeSequences.SET_TEXT_COLOR_GREEN + "Observing game " + parentRepl.getGameName(gameId));
+        observing = true;
         connect();
         observeRepl();
     }
 
     protected void game() {
+        observing = false;
         connect();
         gameRepl();
     }
@@ -71,6 +74,12 @@ public class GameRepl {
                     }
                     String[] args = new String[]{inputs[1], inputs[2]};
                     move(args);
+                    break;
+                case "resign":
+                    if (confirm()) {
+                        resign();
+                        loop = false;
+                    }
                     break;
                 default:
                     parentRepl.invalid();
@@ -217,6 +226,12 @@ public class GameRepl {
     }
 
     private String[] getInput() {
+        getInputPrint();
+        Scanner in = new Scanner(System.in);
+        return in.nextLine().split(" ");
+    }
+
+    private void getInputPrint() {
         System.out.print(Repl.RESET_ALL);
         if (color == ChessGame.TeamColor.WHITE) {
             System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
@@ -233,18 +248,20 @@ public class GameRepl {
                     + parentRepl.authData.username());
             System.out.print(Repl.RESET_ALL + " >> ");
         }
+    }
+
+    private String[] getInputObserver() {
+        getInputObserverPrint();
         Scanner in = new Scanner(System.in);
         return in.nextLine().split(" ");
     }
 
-    private String[] getInputObserver() {
+    private void getInputObserverPrint() {
         System.out.print(Repl.RESET_ALL);
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_COLOR_BLUE
                 + EscapeSequences.SET_TEXT_BOLD);
         System.out.print(parentRepl.getGameName(gameId) + Repl.RESET_ALL + EscapeSequences.SET_BG_COLOR_DARK_GREEN
                 + EscapeSequences.SET_TEXT_COLOR_WHITE + " | observer >>" + Repl.RESET_ALL + " ");
-        Scanner in = new Scanner(System.in);
-        return in.nextLine().split(" ");
     }
 
     private boolean confirm() {
@@ -294,10 +311,20 @@ public class GameRepl {
     public void notify(String msg) {
         System.out.print(Repl.RESET_ALL + "\n");
         System.out.println(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + msg);
+        if (observing) {
+            getInputObserverPrint();
+        } else {
+            getInputPrint();
+        }
     }
 
     public void error(String msg) {
         System.out.print(Repl.RESET_ALL + "\n");
         System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + msg);
+        if (observing) {
+            getInputObserverPrint();
+        } else {
+            getInputPrint();
+        }
     }
 }
