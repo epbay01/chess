@@ -381,10 +381,5 @@ public class Repl {
             );
         }
         System.out.println(EscapeSequences.SET_TEXT_COLOR_YELLOW + EscapeSequences.WHITE_QUEEN);
-
-        System.out.print(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + "chess"
-                + RESET_ALL + " | "
-                + EscapeSequences.SET_TEXT_COLOR_GREEN + authData.username()
-                + RESET_ALL + " >> ");
     }
 }

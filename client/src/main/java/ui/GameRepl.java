@@ -96,7 +96,10 @@ public class GameRepl {
                         parentRepl.invalid();
                         break;
                 }
-            }  catch (Exception e) {}
+            }  catch (Exception e) {
+                error(e.getMessage());
+                loop = true;
+            }
         }
     }
 
@@ -129,7 +132,10 @@ public class GameRepl {
                         parentRepl.invalid();
                         break;
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                error(e.getMessage());
+                loop = true;
+            }
         }
     }
 
@@ -404,7 +410,6 @@ public class GameRepl {
                 var c = (winData[3].isEmpty()) ? null : ChessGame.TeamColor.valueOf(winData[3]);
                 parentRepl.notifyWin(winData[0], winData[1], winData[2], c);
             }
-            return;
         }
         if (observing) {
             getInputObserverPrint();
