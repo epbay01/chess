@@ -19,7 +19,13 @@ public class WebsocketService {
     public static ServerMessage[] connect(UserGameCommand command, Session session) {
         ServerMessage msg1; // board
         ServerMessage msg2; // notification
-        String notifMessage = command.getUsername() + " has joined the game";
+        String notifMessage;
+        if (command.getTeamColor() != null) {
+            notifMessage = command.getUsername() + " has joined the game as "
+                    + command.getTeamColor().toString().toLowerCase();
+        } else {
+            notifMessage = command.getUsername() + " has joined the game";
+        }
 
         try {
             GameData gameData = Server.gameDao.getGame(command.getGameID());
@@ -169,7 +175,7 @@ public class WebsocketService {
         ServerMessage msg = null;
 
         if (game.isInCheck(game.getTeamTurn())) {
-            String teamString = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? "Black" : "White";
+            String teamString = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? "White" : "Black";
             msg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                     teamString + " is now in check");
         }

@@ -100,7 +100,7 @@ public class ChessGame {
 
         // move validity check
         if (!validMoves(move.getStartPosition()).contains(move)) {
-            throw new InvalidMoveException(move + " is not a valid move");
+            throw new InvalidMoveException(move.prettyPrint() + " is not a valid move");
         }
 
         // end of game check

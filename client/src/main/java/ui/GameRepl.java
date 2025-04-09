@@ -53,47 +53,50 @@ public class GameRepl {
         }
 
         while(loop) {
-            String[] inputs = getInput();
-            switch (inputs[0]) {
-                case "help", "h":
-                    help();
-                    System.out.print(EscapeSequences.ERASE_SCREEN);
-                    printBoard(game.getBoard());
-                    break;
-                case "quit", "leave", "q":
-                    if (confirm()) {
-                        loop = false;
-                        leave();
-                    }
-                    break;
-                case "redraw", "r":
-                    System.out.print(EscapeSequences.ERASE_SCREEN);
-                    printBoard(game.getBoard());
-                    break;
-                case "move", "m":
-                    if (inputs.length < 3) {
+            try {
+                String[] inputs = getInput();
+                switch (inputs[0]) {
+                    case "help", "h":
+                        help();
+                        System.out.print(EscapeSequences.ERASE_SCREEN);
+                        printBoard(game.getBoard());
+                        break;
+                    case "quit", "leave", "q":
+                        if (confirm()) {
+                            loop = false;
+                            leave();
+                        }
+                        break;
+                    case "redraw", "r":
+                        System.out.print(EscapeSequences.ERASE_SCREEN);
+                        printBoard(game.getBoard());
+                        break;
+                    case "move", "m":
+                        if (inputs.length < 3) {
+                            parentRepl.invalid();
+                            break;
+                        }
+                        String[] args = new String[]{inputs[1], inputs[2]};
+                        move(args);
+                        break;
+                    case "resign":
+                        if (confirm()) {
+                            loop = false;
+                            resign();
+                        }
+                        break;
+                    case "highlight", "show", "s":
+                        if (inputs.length != 2) {
+                            parentRepl.invalid();
+                            break;
+                        }
+                        highlight(inputs[1]);
+                        break;
+                    default:
                         parentRepl.invalid();
                         break;
-                    }
-                    String[] args = new String[]{inputs[1], inputs[2]};
-                    move(args);
-                    break;
-                case "resign":
-                    if (confirm()) {
-                        loop = false;
-                        resign();
-                    }
-                    break;
-                case "highlight", "show", "s":
-                    if (inputs.length != 2) {
-                        parentRepl.invalid();
-                    }
-                    highlight(inputs[1]);
-                    break;
-                default:
-                    parentRepl.invalid();
-                    break;
-            }
+                }
+            }  catch (Exception e) {}
         }
     }
 
@@ -104,27 +107,29 @@ public class GameRepl {
         }
 
         while (loop) {
-            String[] inputs = getInputObserver();
-            switch (inputs[0]) {
-                case "quit", "leave", "q":
-                    loop = false;
-                    leave();
-                    break;
-                case "help", "h":
-                    help();
-                    if (game != null) {
-                        printBoard(game.getBoard());
-                    }
-                    break;
-                case "redraw", "r":
-                    if (game != null) {
-                        printBoard(game.getBoard());
-                    }
-                    break;
-                default:
-                    parentRepl.invalid();
-                    break;
-            }
+            try {
+                String[] inputs = getInputObserver();
+                switch (inputs[0]) {
+                    case "quit", "leave", "q":
+                        loop = false;
+                        leave();
+                        break;
+                    case "help", "h":
+                        help();
+                        if (game != null) {
+                            printBoard(game.getBoard());
+                        }
+                        break;
+                    case "redraw", "r":
+                        if (game != null) {
+                            printBoard(game.getBoard());
+                        }
+                        break;
+                    default:
+                        parentRepl.invalid();
+                        break;
+                }
+            } catch (Exception e) {}
         }
     }
 
@@ -253,15 +258,45 @@ public class GameRepl {
             return;
         }
 
-        var inp1 = inp[0].toCharArray();
-        var inp2 = inp[1].toCharArray();
+        try {
+            var inp1 = inp[0].toCharArray();
+            var inp2 = inp[1].toCharArray();
+            ChessPiece.PieceType promotion = null;
 
-        var pos1 = new ChessPosition(Integer.parseInt(inp[0].substring(1)),
-                (inp1[0] - 'a' + 1));
-        var pos2 = new ChessPosition(Integer.parseInt(inp[1].substring(1)),
-                (inp2[0] - 'a' + 1));
+            var pos1 = new ChessPosition(Integer.parseInt(inp[0].substring(1)),
+                    (inp1[0] - 'a' + 1));
+            var pos2 = new ChessPosition(Integer.parseInt(inp[1].substring(1)),
+                    (inp2[0] - 'a' + 1));
 
-        sendMove(new ChessMove(pos1, pos2));
+            if (pos2.getRow() == 1 && color == ChessGame.TeamColor.BLACK
+                || pos2.getRow() == 8 && color == ChessGame.TeamColor.WHITE) {
+                if (game.getBoard().getPiece(pos1) != null
+                        && game.getBoard().getPiece(pos1).getPieceType() == ChessPiece.PieceType.PAWN) {
+                    System.out.print(Repl.RESET_ALL + "What piece would you like to promote to? ");
+
+                    boolean loop = false;
+                    do {
+                        Scanner in = new Scanner(System.in);
+                        promotion = switch (in.nextLine().toLowerCase()) {
+                            case "pawn" -> ChessPiece.PieceType.PAWN;
+                            case "knight" -> ChessPiece.PieceType.KNIGHT;
+                            case "rook" -> ChessPiece.PieceType.ROOK;
+                            case "bishop" -> ChessPiece.PieceType.BISHOP;
+                            case "queen" -> ChessPiece.PieceType.QUEEN;
+                            case "king" -> ChessPiece.PieceType.KING;
+                            default -> null;
+                        };
+                        if (promotion == null) {
+                            loop = true;
+                        }
+                    } while (loop);
+                }
+            }
+
+            sendMove(new ChessMove(pos1, pos2, promotion));
+        } catch (Exception e) {
+            error("Error: Invalid move input");
+        }
     }
 
     private String[] getInput() {
@@ -327,10 +362,16 @@ public class GameRepl {
 
     // websocket facade functions
     private void connect() {
-        websocketFacade.command(UserGameCommand.CommandType.CONNECT,
-                parentRepl.authData,
-                parentRepl.getGameID(gameId),
-                color);
+        if (observing) {
+            websocketFacade.command(UserGameCommand.CommandType.CONNECT,
+                    parentRepl.authData,
+                    parentRepl.getGameID(gameId), null);
+        } else {
+            websocketFacade.command(UserGameCommand.CommandType.CONNECT,
+                    parentRepl.authData,
+                    parentRepl.getGameID(gameId),
+                    color);
+        }
     }
 
     private void sendMove(ChessMove move) {

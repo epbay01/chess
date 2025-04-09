@@ -279,6 +279,13 @@ public class Repl {
         boolean loop = true;
         ChessGame.TeamColor color = null;
 
+        List<GameData> games = serverFacade.listGames(authData);
+        idMap = new HashMap<>();
+
+        for (GameData game : games) {
+            idMap.put(games.indexOf(game) + 1, game.gameID());
+        }
+
         while (loop) {
             System.out.print(RESET_ALL + "Enter w/white or b/black: ");
             String inp = scanner.nextLine();
