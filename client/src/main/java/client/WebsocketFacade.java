@@ -51,7 +51,7 @@ public class WebsocketFacade extends Endpoint {
     }
 
     private void notify(ServerMessage message) {
-        repl.notify(message.getMessage());
+        repl.notify(message.getMessage(), message.getWinData());
     }
 
     private void error(ServerMessage message) {

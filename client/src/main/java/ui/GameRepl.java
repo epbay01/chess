@@ -314,7 +314,7 @@ public class GameRepl {
         System.out.println(EscapeSequences.SET_TEXT_BOLD + EscapeSequences.SET_TEXT_COLOR_BLUE + msg);
         if (msg.contains("WON") || msg.contains("stalemate")) {
             if (winData != null && winData.length == 4) {
-                var c = (winData[3].equals("")) ? null : ChessGame.TeamColor.valueOf(winData[3]);
+                var c = (winData[3].isEmpty()) ? null : ChessGame.TeamColor.valueOf(winData[3]);
                 parentRepl.notifyWin(winData[0], winData[1], winData[2], c);
             }
             return;

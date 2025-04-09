@@ -17,7 +17,7 @@ public class ServerMessage {
     ChessGame game;
     String errorMessage;
     String message;
-    String[] winData;
+    String[] winData = null;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -75,6 +75,8 @@ public class ServerMessage {
     public ChessGame getGame() {
         return this.game;
     }
+
+    public String[] getWinData() { return this.winData; }
 
     @Override
     public boolean equals(Object o) {

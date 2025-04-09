@@ -364,14 +364,14 @@ public class Repl {
                     + "Better luck next time, " + loser + RESET_ALL
             );
         } else if (winnerColor == ChessGame.TeamColor.BLACK) {
-            System.out.print(
+            System.out.println(
                     EscapeSequences.SET_BG_COLOR_LIGHT_GREY + EscapeSequences.SET_TEXT_COLOR_BLACK
                             + " " + winner + " won the game " + gameName + "!!\n" +
                             EscapeSequences.SET_BG_COLOR_DARK_GREY + EscapeSequences.SET_TEXT_COLOR_WHITE
                             + "Better luck next time, " + loser + RESET_ALL
             );
         } else {
-            System.out.print(
+            System.out.println(
                     EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_COLOR_WHITE
                     + "Stalemate!" + RESET_ALL
             );
