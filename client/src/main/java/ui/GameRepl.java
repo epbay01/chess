@@ -13,13 +13,13 @@ public class GameRepl {
     private final ChessGame.TeamColor color;
     private final String gameId;
     private final WebsocketFacade websocketFacade;
-    private boolean observing;
+    public boolean observing;
     public ChessGame game;
 
     public GameRepl(Repl parentRepl, ChessGame.TeamColor color, String id) {
         this.parentRepl = parentRepl;
         this.color = color;
-        this.game = new ChessGame();
+        this.game = null;
         if (parentRepl.validateGameId(id)) {
             this.gameId = id;
         } else {
@@ -48,7 +48,9 @@ public class GameRepl {
 
     private void gameRepl() {
         boolean loop = true;
-        printBoard(game.getBoard());
+        if (game != null) {
+            printBoard(game.getBoard());
+        }
 
         while(loop) {
             String[] inputs = getInput();
@@ -97,7 +99,9 @@ public class GameRepl {
 
     private void observeRepl() {
         boolean loop = true;
-        printBoard(game.getBoard());
+        if (game != null) {
+            printBoard(game.getBoard());
+        }
 
         while (loop) {
             String[] inputs = getInputObserver();
@@ -108,10 +112,14 @@ public class GameRepl {
                     break;
                 case "help", "h":
                     help();
-                    printBoard(game.getBoard());
+                    if (game != null) {
+                        printBoard(game.getBoard());
+                    }
                     break;
                 case "redraw", "r":
-                    printBoard(game.getBoard());
+                    if (game != null) {
+                        printBoard(game.getBoard());
+                    }
                     break;
                 default:
                     parentRepl.invalid();
@@ -139,9 +147,14 @@ public class GameRepl {
         parentRepl.waitForQ();
     }
 
-    private void printBoard(ChessBoard board) { printBoard(board, null); }
-    private void printBoard(ChessBoard board, ChessPosition highlight) {
+    public void printBoard(ChessBoard board) { printBoard(board, null); }
+    public void printBoard(ChessBoard board, ChessPosition highlight) {
         HashSet<ChessPosition> positionsToHighlight = new HashSet<>();
+
+        if (game == null) {
+            return;
+        }
+
         if (highlight != null) {
             this.game.validMoves(highlight).forEach(
                     (item) -> positionsToHighlight.add(item.getEndPosition())
@@ -149,7 +162,7 @@ public class GameRepl {
             positionsToHighlight.add(highlight);
         }
 
-        System.out.print(EscapeSequences.ERASE_SCREEN + Repl.RESET_ALL);
+        System.out.println(EscapeSequences.ERASE_SCREEN + Repl.RESET_ALL);
 
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_BOLD
                 + EscapeSequences.SET_TEXT_COLOR_WHITE);
@@ -257,7 +270,7 @@ public class GameRepl {
         return in.nextLine().split(" ");
     }
 
-    private void getInputPrint() {
+    public void getInputPrint() {
         System.out.print(Repl.RESET_ALL);
         if (color == ChessGame.TeamColor.WHITE) {
             System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREY);
@@ -282,7 +295,7 @@ public class GameRepl {
         return in.nextLine().split(" ");
     }
 
-    private void getInputObserverPrint() {
+    public void getInputObserverPrint() {
         System.out.print(Repl.RESET_ALL);
         System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN + EscapeSequences.SET_TEXT_COLOR_BLUE
                 + EscapeSequences.SET_TEXT_BOLD);

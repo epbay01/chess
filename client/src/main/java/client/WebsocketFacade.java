@@ -47,7 +47,18 @@ public class WebsocketFacade extends Endpoint {
     }
 
     private void loadGame(ServerMessage message) {
-        repl.game = message.getGame();
+        if (repl.game == null) {
+            repl.game = message.getGame();
+            repl.printBoard(message.getGame().getBoard());
+            System.out.print("\n"); // sometimes get input prints before, sometimes after
+            if (repl.observing) {
+                repl.getInputObserverPrint();
+            } else {
+                repl.getInputPrint();
+            }
+        } else {
+            repl.game = message.getGame();
+        }
     }
 
     private void notify(ServerMessage message) {
